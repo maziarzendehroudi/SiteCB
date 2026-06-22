@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact et Accès - Camille Bongue Clapiers</title>
+    <meta name="description" content="Prenez rendez-vous au cabinet de psychothérapie de Camille Bongue à Clapiers. Informations pratiques, horaires, accès et formulaire de contact.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="site-wrapper">
+        <header>
+            <div class="header-top">
+                <div class="header-brand">
+                    <h1>Camille Bongue</h1>
+                    <p class="subtitle">Psychothérapeute</p>
+                    <p class="subtitle">Psychanalyste</p>
+                </div>
+                <div class="header-info">
+                    <p>Centre médical Adamantium</p>
+                    <p>Cap Alpha, Clapiers</p>
+                    <p>07 68 99 07 07</p>
+                </div>
+            </div>
+
+            <nav class="navbar">
+                <div class="menu-toggle" id="mobile-menu">
+                    <span></span><span></span><span></span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="pour-qui.html">Pour qui ?</a></li>
+                    <li class="active"><a href="contact.html">Où me trouver ?</a></li>
+                    <li><a href="a-propos.html">A propos</a></li>
+                    <li><a href="cadre-et-tarifs.html">Cadre et tarifs</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <div class="parallax-bg forest-1"></div>
+
+            <section class="text-section" style="text-align: left; padding: 6rem 0;">
+                <div class="container">
+                    <h2 style="text-align: center; margin-bottom: 2rem;">Contact & Localisation du Cabinet</h2>
+                    
+                    <div class="contact-grid">
+                        <div>
+                            <h3>Informations Pratiques</h3>
+                            <p style="margin: 0 0 1.5rem 0; font-size: 1.1rem; text-align: left;">
+                                Le cabinet se situe au sein du <strong>Centre médical Adamantium</strong>, offrant un espace calme favorisant la sérénité et le respect de votre démarche.
+                            </p>
+                            
+                            <p style="margin: 0 0 1rem 0; font-size: 1.1rem; text-align: left;">
+                                <strong>Adresse :</strong><br>
+                                Centre médical Adamantium - Cap Alpha<br>
+                                34830 Clapiers (Zone Grand Montpellier)
+                            </p>
+                            
+                            <p style="margin: 0 0 1rem 0; font-size: 1.1rem; text-align: left;">
+                                <strong>Horaires de consultation :</strong><br>
+                                Du Lundi au Vendredi : 9h00 - 19h00<br>
+                                Uniquement sur rendez-vous.
+                            </p>
+                            
+                            <p style="margin: 0 0 2rem 0; font-size: 1.1rem; text-align: left;">
+                                <strong>Accès :</strong><br>
+                                Parking à la disposition de la patientèle.
+                            </p>
+
+                            <p style="font-size: 1.4rem; color: var(--wix-nav-active); font-weight: 400; margin: 0; text-align: left;">
+                                📞 07 68 99 07 07
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h3>Envoyer un Message</h3>
+                            <form class="contact-form" action="contact.php" method="POST">
+                                <div>
+                                    <label for="name">Nom / Prénom</label>
+                                    <input type="text" id="name" name="name" required autocomplete="name">
+                                </div>
+                                <div>
+                                    <label for="email">Adresse E-mail</label>
+                                    <input type="email" id="email" name="email" required autocomplete="email">
+                                </div>
+                                <div>
+                                    <label for="message">Votre Message</label>
+                                    <textarea id="message" name="message" rows="5" required></textarea>
+                                </div>
+                                <button type="submit">Envoyer la demande</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 4rem; border-radius: 2px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                        <iframe 
+                            src="https://maps.google.com/maps?q=Centre%20m%C3%A9dical%20Adamantium%2C%20Cap%20Alpha%2C%20Clapiers&t=&z=14&ie=UTF8&iwloc=&output=embed" 
+                            width="100%" 
+                            height="450" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-container">
+                <div>Camille Bongue - Psychothérapeute - Psychanalyste - 07 68 99 07 07</div>
+                <div><a href="#">Politique de confidentialité</a></div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const menuToggle = document.getElementById('mobile-menu');
+        const navMenu = document.querySelector('.nav-menu');
+        menuToggle.addEventListener('click', () => {
+            navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
+        });
+    </script>
+</body>
+</html>

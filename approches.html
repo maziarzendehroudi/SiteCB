@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Où me trouver & Contact - Camille Bongue Clapiers</title>
+    <meta name="description" content="Accéder au cabinet de psychothérapie de Camille Bongue à Clapiers. Informations pratiques, plan d'accès et coordonnées téléphoniques.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="site-wrapper">
+        <header>
+            <div class="header-top">
+                <div class="header-brand">
+                    <h1>Camille Bongue</h1>
+                    <p class="subtitle">Psychothérapeute</p>
+                    <p class="subtitle">Psychanalyste</p>
+                </div>
+                <div class="header-info">
+                    <p>Centre médical Adamantium</p>
+                    <p>Cap Alpha, Clapiers</p>
+                    <p>07 68 99 07 07</p>
+                </div>
+            </div>
+
+            <nav class="navbar">
+                <div class="menu-toggle" id="mobile-menu">
+                    <span></span><span></span><span></span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="#">Pour qui ?</a></li>
+                    <li class="active"><a href="approches.html">Où me trouver ?</a></li>
+                    <li><a href="#">A propos</a></li>
+                    <li><a href="#">Cadre et tarifs</a></li>
+                    <li><a href="#">Blog</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <div class="parallax-bg forest-1"></div>
+
+            <section class="text-section" style="background-color: #fff; text-align: left; padding: 6rem 0;">
+                <div class="container">
+                    <h2 style="text-align: center; margin-bottom: 4rem;">Contact & Localisation du Cabinet</h2>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;">
+                        <div>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 1rem; font-weight: 400;">Le Cabinet à Clapiers</h3>
+                            <p style="margin: 0 0 1rem 0; font-size: 1.1rem;">Le cabinet se situe au sein du <strong>Centre médical Adamantium</strong>, à Cap Alpha, offrant un espace calme favorisant la sérénité et le respect de votre démarche.</p>
+                            <p style="margin: 0; font-size: 1.1rem;">
+                                <strong>Adresse :</strong><br>
+                                Centre médical Adamantium - Cap Alpha<br>
+                                34830 Clapiers (Zone Grand Montpellier)
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 1rem; font-weight: 400;">Prise de rendez-vous</h3>
+                            <p style="margin: 0 0 1rem 0; font-size: 1.1rem;">Les consultations se font exclusivement sur rendez-vous en appelant directement le numéro du cabinet :</p>
+                            <p style="font-size: 1.4rem; color: var(--wix-nav-active); font-weight: 400; margin: 0;">
+                                📞 07 68 99 07 07
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-container">
+                <div>Camille Bongue - Psychothérapeute - Psychanalyste - 07 68 99 07 07</div>
+                <div><a href="#">Politique de confidentialité</a></div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const menuToggle = document.getElementById('mobile-menu');
+        const navMenu = document.querySelector('.nav-menu');
+        menuToggle.addEventListener('click', () => {
+            navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
+        });
+    </script>
+</body>
+</html>
