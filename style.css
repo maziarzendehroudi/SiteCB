@@ -228,4 +228,132 @@ footer a:hover { color: #ffffff; }
     border-radius: 4px; 
     overflow: hidden; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+/* ==========================================================================
+   PAGE CONTACT & FORMULAIRE
+   ========================================================================== */
+.contact-section { 
+    padding: 4rem 0; 
+    text-align: left; /* Force l'alignement à gauche pour contrer le centrage par défaut */
+}
+.text-center { 
+    text-align: center; 
+}
+
+/* Grille de contact (2 colonnes sur PC, 1 sur mobile) */
+.contact-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 4rem; 
+    margin-top: 3rem; 
+}
+
+/* Zone d'information gauche */
+.contact-info p {
+    margin: 0 0 1.5rem 0; 
+    font-size: 1.15rem; 
+    line-height: 1.6;
+}
+.phone-highlight {
+    font-size: 1.5rem !important; 
+    color: var(--wix-nav-active) !important; 
+    font-weight: 400 !important; 
+    margin-top: 1rem !important; 
+}
+
+/* Titres des colonnes */
+.contact-grid h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+/* Formulaire */
+.contact-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.form-group label {
+    font-weight: 400;
+    margin-bottom: 0.4rem;
+    color: var(--wix-text-dark);
+    font-size: 1.05rem;
+}
+
+/* Champs de saisie */
+.form-group input, .form-group textarea {
+    width: 100%; /* Oblige les champs à prendre toute la largeur */
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--wix-nav-bg);
+    border-radius: 4px;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    background-color: #FAFAFA;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--wix-nav-active);
+    background-color: var(--bg-white);
+}
+
+/* Case à cocher RGPD */
+.form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    margin-top: 0.5rem;
+    text-align: left;
+}
+
+.form-checkbox input[type="checkbox"] {
+    width: auto;
+    margin-top: 0.3rem;
+    cursor: pointer;
+}
+
+.form-checkbox label {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #666;
+    cursor: pointer;
+    margin-bottom: 0;
+    font-weight: 300;
+}
+
+/* Bouton d'envoi */
+.contact-form button.cta-button {
+    width: auto; /* Empêche le bouton d'être énorme */
+    align-self: flex-start; /* Aligne le bouton à gauche */
+    padding: 1rem 2rem;
+    cursor: pointer;
+    border: none;
+}
+
+/* Carte Google Maps */
+.map-container {
+    margin-top: 4rem; 
+    border-radius: 4px; 
+    overflow: hidden; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Responsive mobile pour le formulaire */
+@media (max-width: 768px) {
+    .contact-grid { 
+        grid-template-columns: 1fr; 
+        gap: 3rem; 
+    }
+    .contact-form button.cta-button {
+        width: 100%; /* Sur mobile, le bouton prend toute la largeur, c'est plus ergonomique */
+    }
 }
