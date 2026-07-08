@@ -142,6 +142,10 @@ header { background-color: var(--wix-header-bg); width: 100%; }
 .forest-3 { background-image: url('assets/img/foret3.jpg'); }
 .forest-4 { background-image: url('assets/img/foret4.jpg'); }
 
+/* Permet d'aligner l'image de fond par le haut pour ne pas rogner le sujet principal */
+.bg-top {
+    background-position: center top !important;
+}
 /* ==========================================================================
    PAGE CONTACT & FORMULAIRE
    ========================================================================== */
