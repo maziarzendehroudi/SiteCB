@@ -146,6 +146,20 @@ header { background-color: var(--wix-header-bg); width: 100%; }
 .bg-top {
     background-position: center top !important;
 }
+
+/* Ajustement sur-mesure pour la page Tarifs (Divan) */
+.bg-divan {
+    height: 450px !important; 
+    background-position: center 30% !important; 
+}
+
+@media (max-width: 768px) {
+    .bg-divan {
+        height: 250px !important;
+        background-position: center 40% !important; 
+    }
+}
+
 /* ==========================================================================
    PAGE CONTACT & FORMULAIRE
    ========================================================================== */
