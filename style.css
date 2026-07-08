@@ -167,4 +167,65 @@ footer a:hover { color: #ffffff; }
     .citation { font-size: 1.4rem !important; } 
     
     .footer-container { flex-direction: column; text-align: center; gap: 1rem; }
+/* ==========================================================================
+   PAGE CONTACT (Remplacement des styles en ligne)
+   ========================================================================== */
+.contact-section { 
+    padding: 4rem 0; /* Cohérent avec la nouvelle aération de la page d'accueil */
+    text-align: left; 
+}
+.text-center { 
+    text-align: center; 
+}
+
+/* Zone d'information gauche */
+.contact-info p {
+    margin: 0 0 1.5rem 0; 
+    font-size: 1.15rem; 
+    text-align: left;
+    max-width: 100%; /* Écrase le max-width global des paragraphes */
+}
+.phone-highlight {
+    font-size: 1.5rem !important; 
+    color: var(--wix-nav-active) !important; 
+    font-weight: 400 !important; 
+    margin-top: 1rem !important; 
+}
+
+/* Formulaire */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.2rem;
+}
+.form-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+}
+.form-checkbox input[type="checkbox"] {
+    width: auto;
+    margin-top: 0.4rem;
+    cursor: pointer;
+}
+.form-checkbox label {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #666;
+    cursor: pointer;
+}
+.contact-form button.cta-button {
+    width: auto;
+    align-self: flex-start;
+    margin-top: 0;
+}
+
+/* Carte Google Maps */
+.map-container {
+    margin-top: 4rem; 
+    border-radius: 4px; 
+    overflow: hidden; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }

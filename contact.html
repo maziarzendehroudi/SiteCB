@@ -45,30 +45,49 @@
 
         <main>
             <div class="parallax-bg forest-1"></div>
-            <section class="text-section" style="text-align: left; padding: 6rem 0;">
+            <section class="text-section contact-section">
                 <div class="container">
-                    <h1 style="text-align: center; margin-bottom: 3rem; font-size: 2.2rem; font-weight: 300;">Contact & Localisation du Cabinet</h1>
+                    <h1 class="main-title text-center">Contact & Localisation du Cabinet</h1>
                     <div class="contact-grid">
-                        <div>
+                        <div class="contact-info">
                             <h3>Informations Pratiques</h3>
-                            <p style="margin: 0 0 1.5rem 0; font-size: 1.1rem; text-align: left;">Le cabinet se situe au sein du <strong>Centre médical Adamantium</strong>, offrant un espace calme favorisant la sérénité et le respect de votre démarche.</p>
-                            <p style="margin: 0 0 1rem 0; font-size: 1.1rem; text-align: left;"><strong>Adresse :</strong><br>Centre médical Adamantium - Cap Alpha<br>34830 Clapiers (Zone Grand Montpellier)</p>
-                            <p style="margin: 0 0 1rem 0; font-size: 1.1rem; text-align: left;"><strong>Horaires de consultation :</strong><br>Du Lundi au Vendredi : 9h00 - 19h00<br>Uniquement sur rendez-vous.</p>
-                            <p style="margin: 0 0 2rem 0; font-size: 1.1rem; text-align: left;"><strong>Accès :</strong><br>Parking à la disposition de la patientèle.</p>
-                            <p style="font-size: 1.4rem; color: var(--wix-nav-active); font-weight: 400; margin: 0; text-align: left;">📞 07 68 99 07 07</p>
+                            <p>Le cabinet se situe au sein du <strong>Centre médical Adamantium</strong>, offrant un espace calme favorisant la sérénité et le respect de votre démarche.</p>
+                            <p><strong>Adresse :</strong><br>Centre médical Adamantium - Cap Alpha<br>34830 Clapiers (Zone Grand Montpellier)</p>
+                            <p><strong>Horaires de consultation :</strong><br>Du Lundi au Vendredi : 9h00 - 19h00<br>Uniquement sur rendez-vous.</p>
+                            <p><strong>Accès :</strong><br>Parking à la disposition de la patientèle.</p>
+                            <p class="phone-highlight">📞 07 68 99 07 07</p>
                         </div>
-                        <div>
+                        
+                        <div class="contact-form-wrapper">
                             <h3>Envoyer un Message</h3>
                             <form class="contact-form" action="contact.php" method="POST">
-                                <div><label for="name">Nom / Prénom</label><input type="text" id="name" name="name" required autocomplete="name"></div>
-                                <div><label for="email">Adresse E-mail</label><input type="email" id="email" name="email" required autocomplete="email"></div>
-                                <div><label for="message">Votre Message</label><textarea id="message" name="message" rows="5" required></textarea></div>
-                                <button type="submit">Envoyer la demande</button>
+                                <div class="form-group">
+                                    <label for="name">Nom / Prénom</label>
+                                    <input type="text" id="name" name="name" required autocomplete="name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Adresse E-mail</label>
+                                    <input type="email" id="email" name="email" required autocomplete="email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone">Téléphone</label>
+                                    <input type="tel" id="phone" name="phone" autocomplete="tel">
+                                </div>
+                                <div class="form-group">
+                                    <label for="message">Votre Message</label>
+                                    <textarea id="message" name="message" rows="5" required></textarea>
+                                </div>
+                                <div class="form-checkbox">
+                                    <input type="checkbox" id="rgpd" name="rgpd" required>
+                                    <label for="rgpd">J'accepte que mes données soient traitées pour être recontacté(e). <em>Merci de ne transmettre aucune information médicale confidentielle via ce formulaire.</em></label>
+                                </div>
+                                <button type="submit" class="cta-button">Envoyer la demande</button>
                             </form>
                         </div>
                     </div>
-                    <div style="margin-top: 4rem; border-radius: 2px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                        <iframe src="https://maps.google.com/maps?q=Centre%20m%C3%A9dical%20Adamantium%2C%20Cap%20Alpha%2C%20Clapiers&t=&z=14&ie=UTF8&iwloc=&output=embed" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2886.645163155734!2d3.9014167!3d43.6555135!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12b6af7eb03260d1%3A0xcb06f85d263b6bc6!2sCap%20Alpha!5e0!3m2!1sfr!2sfr!4v1700000000000!5m2!1sfr!2sfr" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </section>
