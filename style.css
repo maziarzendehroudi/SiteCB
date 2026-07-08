@@ -42,27 +42,34 @@ h2 { font-size: 2rem; margin-bottom: 2rem; }
 
 .text-section p { 
     font-size: 1.15rem; 
-    font-weight: 300; 
-    max-width: 860px; 
-    margin: 0 auto 1.2rem auto; /* Marge inférieure légèrement augmentée */
-    text-align: justify; 
-    line-height: 1.6; 
+    font-weight: 400;          /* Optimisation UX : meilleure assise visuelle */
+    color: #2D2D2D;            /* Optimisation UX : meilleur contraste pour la lecture */
+    max-width: 680px;          /* Optimisation UX : longueur de ligne idéale (60-75 caractères) */
+    margin: 0 auto 1.5rem auto; 
+    text-align: left;          /* Optimisation UX : alignement à gauche pour éviter les espaces irréguliers */
+    line-height: 1.7;          /* Interlignage plus fluide */
 }
 
 .citation { 
-    font-size: 28px !important; 
-    color: rgb(111, 75, 33) !important; 
+    font-size: 1.6rem !important; 
+    color: #5D3E1B !important;    /* Optimisation UX : contraste ajusté pour le marron */
     font-style: italic; 
     font-weight: 300; 
-    line-height: 1.4; 
-    margin-bottom: 0.5rem !important; 
+    line-height: 1.5; 
+    margin-bottom: 0.6rem !important; 
     text-align: center !important; 
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
 }
 .auteur { 
-    font-size: 1.1rem; 
-    font-weight: 300; 
+    font-size: 1rem; 
+    font-weight: 400; 
+    text-transform: uppercase;   /* Passage en petites majuscules épurées */
+    letter-spacing: 1px; 
+    color: #666;
     margin-top: 0 !important; 
-    margin-bottom: 2.5rem !important; 
+    margin-bottom: 3rem !important; 
     text-align: center !important; 
 }
 .text-section a { 
@@ -85,7 +92,7 @@ h2 { font-size: 2rem; margin-bottom: 2rem; }
     font-size: 1.2rem; 
     text-decoration: none; 
     border-radius: 3px; 
-    transition: all 0.3s ease; /* Transition sur "all" pour inclure le transform */
+    transition: all 0.3s ease; 
     margin-top: 2rem; 
     border: none;
 }
@@ -93,8 +100,8 @@ h2 { font-size: 2rem; margin-bottom: 2rem; }
     background-color: #8A9A91; 
     color: var(--bg-white); 
     text-decoration: none;
-    transform: translateY(-2px); /* Effet de soulèvement */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Ombre douce */
+    transform: translateY(-2px); /* Effet de soulèvement discret */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Ombre douce au survol */
 }
 
 /* ==========================================================================
@@ -136,104 +143,11 @@ header { background-color: var(--wix-header-bg); width: 100%; }
 .forest-4 { background-image: url('assets/img/foret4.jpg'); }
 
 /* ==========================================================================
-   FOOTER
-   ========================================================================== */
-footer { background-color: #2F2F2F; color: #A3A3A3; padding: 2rem 0; font-size: 0.95rem; }
-.footer-container { max-width: var(--max-width); margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
-footer a { color: #A3A3A3; text-decoration: none; transition: color 0.3s ease; }
-footer a:hover { color: #ffffff; }
-
-/* ==========================================================================
-   RESPONSIVE (Optimisation Mobile)
-   ========================================================================== */
-@media (max-width: 980px) { .header-top { padding: 2rem 1.5rem; } }
-@media (max-width: 768px) {
-    .header-top { flex-direction: column; text-align: center; padding: 2rem 1.5rem; }
-    .header-brand, .header-info { align-items: center; text-align: center; width: 100%; }
-    .header-brand .site-title, .header-brand .subtitle { font-size: 1.8rem; text-align: center; }
-    .header-info p { font-size: 1.1rem; text-align: center; }
-    .header-info { margin-top: 1.5rem; }
-
-    .navbar { display: flex; justify-content: flex-end; }
-    .menu-toggle { display: flex; }
-    .nav-menu { display: none; flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; background-color: var(--wix-nav-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .nav-menu li a { padding: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.2); }
-    
-    .parallax-bg { background-attachment: scroll; height: 200px; }
-    
-    h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
-    .text-section { padding: 3rem 1rem; }
-    .text-section p { text-align: left; font-size: 1.05rem; } 
-    .citation { font-size: 1.4rem !important; } 
-    
-    .footer-container { flex-direction: column; text-align: center; gap: 1rem; }
-/* ==========================================================================
-   PAGE CONTACT (Remplacement des styles en ligne)
-   ========================================================================== */
-.contact-section { 
-    padding: 4rem 0; /* Cohérent avec la nouvelle aération de la page d'accueil */
-    text-align: left; 
-}
-.text-center { 
-    text-align: center; 
-}
-
-/* Zone d'information gauche */
-.contact-info p {
-    margin: 0 0 1.5rem 0; 
-    font-size: 1.15rem; 
-    text-align: left;
-    max-width: 100%; /* Écrase le max-width global des paragraphes */
-}
-.phone-highlight {
-    font-size: 1.5rem !important; 
-    color: var(--wix-nav-active) !important; 
-    font-weight: 400 !important; 
-    margin-top: 1rem !important; 
-}
-
-/* Formulaire */
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1.2rem;
-}
-.form-checkbox {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    margin-bottom: 1.5rem;
-    margin-top: 0.5rem;
-}
-.form-checkbox input[type="checkbox"] {
-    width: auto;
-    margin-top: 0.4rem;
-    cursor: pointer;
-}
-.form-checkbox label {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    color: #666;
-    cursor: pointer;
-}
-.contact-form button.cta-button {
-    width: auto;
-    align-self: flex-start;
-    margin-top: 0;
-}
-
-/* Carte Google Maps */
-.map-container {
-    margin-top: 4rem; 
-    border-radius: 4px; 
-    overflow: hidden; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-/* ==========================================================================
    PAGE CONTACT & FORMULAIRE
    ========================================================================== */
 .contact-section { 
     padding: 4rem 0; 
-    text-align: left; /* Force l'alignement à gauche pour contrer le centrage par défaut */
+    text-align: left; /* Force l'alignement pour structurer les blocs */
 }
 .text-center { 
     text-align: center; 
@@ -252,6 +166,8 @@ footer a:hover { color: #ffffff; }
     margin: 0 0 1.5rem 0; 
     font-size: 1.15rem; 
     line-height: 1.6;
+    max-width: 100%; /* Permet d'occuper tout l'espace de la colonne de gauche */
+    text-align: left;
 }
 .phone-highlight {
     font-size: 1.5rem !important; 
@@ -267,7 +183,7 @@ footer a:hover { color: #ffffff; }
     font-weight: 400;
 }
 
-/* Formulaire */
+/* Structure du Formulaire */
 .contact-form {
     display: flex;
     flex-direction: column;
@@ -287,9 +203,9 @@ footer a:hover { color: #ffffff; }
     font-size: 1.05rem;
 }
 
-/* Champs de saisie */
+/* Champs de saisie du formulaire */
 .form-group input, .form-group textarea {
-    width: 100%; /* Oblige les champs à prendre toute la largeur */
+    width: 100%; 
     padding: 0.9rem 1rem;
     border: 1px solid var(--wix-nav-bg);
     border-radius: 4px;
@@ -330,16 +246,16 @@ footer a:hover { color: #ffffff; }
     font-weight: 300;
 }
 
-/* Bouton d'envoi */
+/* Bouton d'envoi du formulaire */
 .contact-form button.cta-button {
-    width: auto; /* Empêche le bouton d'être énorme */
-    align-self: flex-start; /* Aligne le bouton à gauche */
+    width: auto; 
+    align-self: flex-start; 
     padding: 1rem 2rem;
     cursor: pointer;
     border: none;
 }
 
-/* Carte Google Maps */
+/* Conteneur de la carte Google Maps */
 .map-container {
     margin-top: 4rem; 
     border-radius: 4px; 
@@ -347,13 +263,49 @@ footer a:hover { color: #ffffff; }
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-/* Responsive mobile pour le formulaire */
+/* ==========================================================================
+   BLOG & GRILLES ORIGINALES
+   ========================================================================== */
+.blog-container { max-width: 800px; margin: 0 auto; text-align: left; }
+.blog-post { background-color: var(--bg-white); padding: 2.5rem; margin-bottom: 3rem; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+.blog-post h3 { font-size: 1.6rem; margin-bottom: 0.5rem; color: var(--wix-text-dark); font-weight: 400; }
+.blog-date { font-size: 0.95rem; color: #8A9A91; margin-bottom: 1.5rem; font-style: italic; }
+.blog-post p { font-size: 1.1rem; margin-bottom: 1.5rem; text-align: justify; }
+.blog-post a.read-more { display: inline-block; color: var(--wix-nav-active); text-decoration: none; font-weight: 400; font-size: 1.1rem; border-bottom: 1px solid var(--wix-nav-active); padding-bottom: 2px; transition: color 0.3s ease, border-color 0.3s ease; }
+.blog-post a.read-more:hover { color: #4A4A4A; border-color: #4A4A4A; }
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+footer { background-color: #2F2F2F; color: #A3A3A3; padding: 2rem 0; font-size: 0.95rem; }
+.footer-container { max-width: var(--max-width); margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+footer a { color: #A3A3A3; text-decoration: none; transition: color 0.3s ease; }
+footer a:hover { color: #ffffff; }
+
+/* ==========================================================================
+   RESPONSIVE (Optimisation Mobile)
+   ========================================================================== */
+@media (max-width: 980px) { .header-top { padding: 2rem 1.5rem; } }
 @media (max-width: 768px) {
-    .contact-grid { 
-        grid-template-columns: 1fr; 
-        gap: 3rem; 
-    }
-    .contact-form button.cta-button {
-        width: 100%; /* Sur mobile, le bouton prend toute la largeur, c'est plus ergonomique */
-    }
+    .header-top { flex-direction: column; text-align: center; padding: 2rem 1.5rem; }
+    .header-brand, .header-info { align-items: center; text-align: center; width: 100%; }
+    .header-brand .site-title, .header-brand .subtitle { font-size: 1.8rem; text-align: center; }
+    .header-info p { font-size: 1.1rem; text-align: center; }
+    .header-info { margin-top: 1.5rem; }
+
+    .navbar { display: flex; justify-content: flex-end; }
+    .menu-toggle { display: flex; }
+    .nav-menu { display: none; flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; background-color: var(--wix-nav-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .nav-menu li a { padding: 1.2rem; border-top: 1px solid rgba(255, 255, 255, 0.2); }
+    
+    .parallax-bg { background-attachment: scroll; height: 200px; }
+    
+    h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
+    .text-section { padding: 3rem 1rem; }
+    .text-section p { text-align: left; font-size: 1.05rem; } 
+    .citation { font-size: 1.4rem !important; } 
+    
+    .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .contact-form button.cta-button { width: 100%; }
+    .footer-container { flex-direction: column; text-align: center; gap: 1rem; }
 }
