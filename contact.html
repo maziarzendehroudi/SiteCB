@@ -13,7 +13,7 @@
     <meta property="og:image" content="https://www.psychotherapeutemontpellier.fr/assets/img/foret1.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
     <div class="site-wrapper">
@@ -34,7 +34,14 @@
                 <div class="menu-toggle" id="mobile-menu"><span></span><span></span><span></span></div>
                 <ul class="nav-menu">
                     <li><a href="index.html">Accueil</a></li>
-                    <li><a href="pour-qui.html">Pour qui ?</a></li>
+                    <li class="has-submenu">
+                        <a href="#">Pour qui ?</a>
+                        <ul class="submenu">
+                            <li><a href="pour-qui-enfants.html">Enfants</a></li>
+                            <li><a href="pour-qui-adolescents.html">Adolescents</a></li>
+                            <li><a href="pour-qui-adultes.html">Adultes</a></li>
+                        </ul>
+                    </li>
                     <li class="active"><a href="contact.html">Où me trouver ?</a></li>
                     <li><a href="a-propos.html">A propos</a></li>
                     <li><a href="cadre-et-tarifs.html">Cadre et tarifs</a></li>
@@ -44,50 +51,20 @@
         </header>
 
         <main>
-            <!-- L'image parallax a été supprimée ici -->
             <section class="text-section contact-section">
                 <div class="container">
                     <h1 class="main-title text-center">Contact & Localisation du Cabinet</h1>
-                    <div class="contact-grid">
-                        <div class="contact-info">
-                            <h3>Informations Pratiques</h3>
-                            <p>Le cabinet se situe au sein du <strong>Centre médical Adamantium</strong>, offrant un espace calme favorisant la sérénité et le respect de votre démarche.</p>
-                            <p><strong>Adresse :</strong><br>Centre médical Adamantium - Cap Alpha<br>34830 Clapiers (Zone Grand Montpellier)</p>
-                            <p><strong>Horaires de consultation :</strong><br>Du Lundi au Vendredi : 9h00 - 19h00<br>Uniquement sur rendez-vous.</p>
-                            <p><strong>Accès :</strong><br>Parking à la disposition de la patientèle.</p>
-                            <p class="phone-highlight">📞 07 68 99 07 07</p>
-                        </div>
-                        
-                        <div class="contact-form-wrapper">
-                            <h3>Envoyer un Message</h3>
-                            <form class="contact-form" action="contact.php" method="POST">
-                                <div class="form-group">
-                                    <label for="name">Nom / Prénom</label>
-                                    <input type="text" id="name" name="name" required autocomplete="name">
-                                </div>
-                                <div class="form-group">
-                                    <label for="email">Adresse E-mail</label>
-                                    <input type="email" id="email" name="email" required autocomplete="email">
-                                </div>
-                                <div class="form-group">
-                                    <label for="phone">Téléphone</label>
-                                    <input type="tel" id="phone" name="phone" autocomplete="tel">
-                                </div>
-                                <div class="form-group">
-                                    <label for="message">Votre Message</label>
-                                    <textarea id="message" name="message" rows="5" required></textarea>
-                                </div>
-                                <div class="form-checkbox">
-                                    <input type="checkbox" id="rgpd" name="rgpd" required>
-                                    <label for="rgpd">J'accepte que mes données soient traitées pour être recontacté(e). <em>Merci de ne transmettre aucune information médicale confidentielle via ce formulaire.</em></label>
-                                </div>
-                                <button type="submit" class="cta-button">Envoyer la demande</button>
-                            </form>
-                        </div>
+                    
+                    <div class="contact-info" style="max-width: 700px; margin: 0 auto 3rem auto; text-align: center;">
+                        <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 400;">Informations Pratiques</h3>
+                        <p style="text-align: center;">Le cabinet se situe au sein du <strong>Centre médical Adamantium</strong>, offrant un espace calme favorisant la sérénité et le respect de votre démarche.</p>
+                        <p style="text-align: center;"><strong>Adresse :</strong><br>Centre médical Adamantium - Cap Alpha<br>34830 Clapiers (Zone Grand Montpellier)</p>
+                        <p style="text-align: center;"><strong>Horaires de consultation :</strong><br>Du Lundi au Vendredi : 9h00 - 19h00<br>Uniquement sur rendez-vous.</p>
+                        <p style="text-align: center;"><strong>Accès :</strong><br>Parking à la disposition de la patientèle.</p>
+                        <p class="phone-highlight" style="font-size: 1.5rem; color: var(--wix-nav-active); margin-top: 1.5rem;">📞 07 68 99 07 07</p>
                     </div>
                     
                     <div class="map-container">
-                        <!-- Lien Google Maps pointant vers Camille Bongue à Clapiers -->
                         <iframe src="https://maps.google.com/maps?q=Camille%20Bongue%2C%20Cap%20Alpha%2C%2034830%20Clapiers&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
