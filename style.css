@@ -55,10 +55,12 @@ header { background-color: var(--wix-header-bg); width: 100%; }
 .nav-menu li a:hover { background-color: rgba(255, 255, 255, 0.15); }
 
 /* Sous-menu (Dropdown) */
-.dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background-color: var(--wix-nav-bg); list-style: none; padding: 0; margin: 0; min-width: 180px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10000; }
-.dropdown:hover .dropdown-menu { display: block; }
-.dropdown-menu li { text-align: left; }
-.dropdown-menu li a { padding: 1rem 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.2); font-size: 1.05rem; }
+.has-submenu { position: relative; }
+.submenu { display: none; position: absolute; top: 100%; left: 0; background-color: var(--wix-nav-bg); list-style: none; padding: 0; margin: 0; min-width: 180px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10000; }
+.has-submenu:hover .submenu { display: block; }
+.submenu li { text-align: left; width: 100%; }
+.submenu li a { padding: 1rem 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.2); font-size: 1.05rem; transition: background-color 0.3s ease; }
+.submenu li a:hover { background-color: #b8c4ba; } /* Léger assombrissement au survol dans le sous-menu */
 
 /* Menu Mobile (Hamburger) */
 .menu-toggle { display: none; flex-direction: column; justify-content: space-between; width: 40px; height: 30px; cursor: pointer; padding: 5px; margin: 10px 15px; }
@@ -115,8 +117,8 @@ footer a:hover { color: #fff; }
     .nav-menu li a { padding: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.2); }
     
     /* Adaptation Sous-menu Mobile */
-    .dropdown-menu { position: static; display: block; box-shadow: none; background-color: rgba(0, 0, 0, 0.05); }
-    .dropdown-menu li a { padding-left: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+    .submenu { position: static; display: block; box-shadow: none; background-color: rgba(0, 0, 0, 0.05); }
+    .submenu li a { padding-left: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
 
     .parallax-bg { background-attachment: scroll; height: 160px; }
     h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
