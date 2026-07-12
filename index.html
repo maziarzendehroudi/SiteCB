@@ -34,7 +34,14 @@
                 <div class="menu-toggle" id="mobile-menu"><span></span><span></span><span></span></div>
                 <ul class="nav-menu">
                     <li class="active"><a href="index.html">Accueil</a></li>
-                    <li><a href="pour-qui.html">Pour qui ?</a></li>
+                    <li class="has-submenu">
+                        <a href="#">Pour qui ?</a>
+                        <ul class="submenu">
+                            <li><a href="pour-qui-enfants.html">Enfants</a></li>
+                            <li><a href="pour-qui-adolescents.html">Adolescents</a></li>
+                            <li><a href="pour-qui-adultes.html">Adultes</a></li>
+                        </ul>
+                    </li>
                     <li><a href="contact.html">Où me trouver ?</a></li>
                     <li><a href="a-propos.html">A propos</a></li>
                     <li><a href="cadre-et-tarifs.html">Cadre et tarifs</a></li>
@@ -87,23 +94,4 @@
                     <p class="citation">"L'art, c'est le plus court chemin de l'homme à l'homme"</p>
                     <p class="auteur">André Malraux</p>
                     <p>Elle est une alternative à la thérapie psychanalytique, mais peut être aussi un de ses outils : quand la parole est empêchée par une souffrance sans nom ou impossible à dire, je propose un travail d'expression artistique libre.</p>
-                    <p>La créativité a une dimension thérapeutique; elle révèle au patient des zones de lui-même qu'il ignorait, et lui permet de se décharger de sa souffrance, en retrouvant en lui un espace neutre, détendu, de rêverie et de jeu.</p>
-                    <p>Peinture, dessin, modelage ou écriture pourront être proposés en plus, ou à la place, du travail de la parole. Chacun pourra également apporter ses créations pour partager son univers et nourrir le travail thérapeutique.</p>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <div class="footer-container">
-                <div>Camille Bongue - Psychothérapeute - Psychanalyste - 07 68 99 07 07</div>
-                <div><a href="#">Politique de confidentialité</a></div>
-            </div>
-        </footer>
-    </div>
-    <script>
-        const menuToggle = document.getElementById('mobile-menu');
-        const navMenu = document.querySelector('.nav-menu');
-        menuToggle.addEventListener('click', () => { navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex'; });
-    </script>
-</body>
-</html>
+                    <p>La créativité a une dimension thérapeutique; elle révèle au patient des zones de lui-même qu'il ignorait, et lui permet de se décharger de sa souffrance, en retrouvant en
