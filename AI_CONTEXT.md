@@ -7,19 +7,20 @@
 - **Exigences clés :** Sécurité maximale (zéro BDD SQL), indépendance totale et portabilité du client (dépôt GitHub possédé par le client), code propre et respect de l'existant graphique de la v1.0.
 
 ## 2. État Actuel du Backlog (Dynamique)
-## 2. État Actuel du Backlog (Dynamique)
 | ID | Module / Tâche | Statut |
 | :--- | :--- | :--- |
 | **BK-01** | Audit et Extraction des Contenus de la v1.0 existante | **Réalisé** |
 | **BK-02** | Refactorisation du Frontend React (lecture des Markdown) | **Réalisé** |
-| **BK-03** | Service API GitHub (Commit automatique) | **À faire** |
-| **BK-04** | Authentification Admin (Token GitHub) | **À faire** |
-| **BK-05** | Interface Dashboard Admin (UI) | **À faire** |
-| **BK-06** | Éditeur des Pages Statiques | **À faire** |
-| **BK-07** | Gestionnaire d'Articles de Blog (CRUD) | **À faire** |
-| **BK-08** | Gestion et Upload des Images | **À faire** |
-| **BK-09** | Pipeline CI/CD et Déploiement OVH | **À faire** |
+| **BK-03** | Service API GitHub (Commit automatique) | **Réalisé** |
+| **BK-04** | Authentification Admin (Token GitHub) | **Réalisé** |
+| **BK-05** | Interface Dashboard Admin (UI) | **Réalisé** |
+| **BK-06** | Éditeur des Pages Statiques | **Réalisé** |
+| **BK-07** | Gestionnaire d'Articles de Blog (CRUD) | **Réalisé** |
+| **BK-08** | Gestion et Upload des Images | **Réalisé** |
+| **BK-09** | Pipeline CI/CD et Déploiement OVH | **Réalisé** |
 | **BK-10** | Recette, Bascule Domaine et Livraison Client | **À faire** |
+| **BK-11** | Ajustement et robustesse du Service GitHub (gestion UTF-8 et encodage) | **À faire** |
+| **BK-12** | Configuration des secrets et des variables d'environnement CI/CD OVH | **À faire** |
 
 ## 3. Consigne permanente (Début de session)
 À chaque début de session, analyse l'état du backlog ci-dessus, identifie la prochaine tâche prioritaire "À faire", et guide-moi ou code les briques nécessaires en respectant les directives de la section 1 et l'existant de la v1.0.

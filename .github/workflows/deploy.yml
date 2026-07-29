@@ -1,0 +1,35 @@
+name: CI/CD - Build & Deploy to OVH
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Récupération du code source
+        uses: actions/checkout@v4
+
+      - name: 2. Configuration de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 3. Installation des dépendances
+        run: npm ci
+
+      - name: 4. Build de l'application React / Vite
+        run: npm run build
+
+      - name: 5. Déploiement sur l'hébergement OVH via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.OVH_FTP_SERVER }}
+          username: ${{ secrets.OVH_FTP_USERNAME }}
+          password: ${{ secrets.OVH_FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ./ # Ajuster selon la racine du site sur l'hébergement OVH (ex: www/ ou public_html/)
