@@ -1,16 +1,20 @@
 # Guide Utilisateur (Espace Administration)
 
 ## 1. Accès et Connexion à l'Espace d'Administration
-1. Se rendre à l'adresse sécurisée du site suivie de la route d'administration (ex: `votresite.com/admin`).
-2. S'authentifier à l'aide des identifiants sécurisés (connexion liée au compte administrateur autorisé sur le dépôt GitHub).
+1. Se rendre sur le site public et cliquer sur le lien discret **"Administration CMS"** situé tout en bas dans le pied de page (ou ajouter directement `#admin` à l'URL, ex: `votresite.com/#admin`).
+2. S'authentifier à l'aide de votre token d'accès personnel GitHub (PAT) sécurisé.
 
-## 2. Édition des Pages Fixes (Accueil, Cabinet, Tarifs)
-- Sélectionner l'onglet **Pages** dans le menu latéral du dashboard.
-- Cliquer sur la page à modifier (ex: *Cabinet*).
-- Modifier les champs textuels dans l'éditeur épuré (titres, paragraphes, informations pratiques).
-- Cliquer sur **Enregistrer** : cette action génère automatiquement la mise à jour des fichiers de contenu et actualise le site public en arrière-plan.
+## 2. Édition des Pages Fixes (Pages Statiques)
+- Sélectionner l'onglet **Pages Statiques** dans le menu de l'espace d'administration.
+- Choisir la page à modifier dans le gestionnaire.
+- Modifier les champs textuels et le contenu Markdown.
+- Valider l'enregistrement : cela génère automatiquement un commit sur le dépôt GitHub et actualise le site en arrière-plan.
 
 ## 3. Gestion du Blog et des Articles
-- Sélectionner l'onglet **Blog**.
-- Pour créer un nouvel article : cliquer sur **Nouvel article**, renseigner le titre, la date de publication et rédiger le contenu.
-- Pour modifier ou supprimer un article existant : le sélectionner dans la liste, effectuer les corrections et valider. L'historique des modifications est intégralement conservé et versionné sur GitHub.
+- Sélectionner l'onglet **Blog** dans le menu d'administration.
+- **Pour créer un nouvel article :** renseigner les informations requises et rédiger le contenu.
+- **Pour modifier ou supprimer :** sélectionner l'article concerné dans la liste et effectuer les modifications.
+
+## 4. Gestion et Upload des Images
+- Sélectionner l'onglet **Images** dans le menu d'administration.
+- Permet de téléverser et de gérer les fichiers multimédias/images destinés à illustrer les pages ou les articles du site.
