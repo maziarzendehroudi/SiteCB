@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Camille Bongue - Psychothérapeute</title>
+    <script type="text/javascript">
+      // Redirection SPA pour GitHub Pages (redirige l'URL demandée vers index.html en conservant le chemin)
+      var pathSegmentsToKeep = 1; // Ajustez selon le nombre de sous-dossiers (1 pour /SiteCB/)
+      var l = window.location;
+      var pathname = l.pathname.split('/').slice(1 + pathSegmentsToKeep).join('/');
+      var search = l.search ? '&' + l.search.slice(1) : '';
+      var hash = l.hash ? l.hash : '';
+      l.replace(
+        l.protocol + '//' + l.host + '/' + l.pathname.split('/')[1] + '/' +
+        (pathname ? '?p=' + pathname + search : '') + hash
+      );
+    </script>
+  </head>
+  body>
+  </body>
+</html>
