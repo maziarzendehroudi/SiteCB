@@ -145,7 +145,7 @@ export default function App() {
           pageData && (
             <div 
               className="markdown-content" 
-              dangerouslySetInnerHTML={{ __html: marked.parse(pageData.content) }} 
+              dangerouslySetInnerHTML={{ __html: pageData.content }} 
             />
           )
         )}
