@@ -1,9 +1,13 @@
-name: CI/CD - Build & Deploy to OVH
+name: CI/CD - Build & Deploy to GitHub Pages
 
 on:
   push:
     branches:
       - main
+
+# Autoriser les permissions de lecture/écriture pour le déploiement sur GitHub Pages
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -29,11 +33,8 @@ jobs:
           VITE_GITHUB_REPO: ${{ secrets.VITE_GITHUB_REPO }}
           VITE_GITHUB_BRANCH: ${{ secrets.VITE_GITHUB_BRANCH }}
 
-      # - name: 5. Déploiement sur l'hébergement OVH via FTP (Désactivé temporairement)
-      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      #   with:
-      #     server: ${{ secrets.OVH_FTP_SERVER }}
-      #     username: ${{ secrets.OVH_FTP_USERNAME }}
-      #     password: ${{ secrets.OVH_FTP_PASSWORD }}
-      #     local-dir: ./dist/
-      #     server-dir: ./
+      - name: 5. Déploiement sur GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
