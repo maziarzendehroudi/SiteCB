@@ -2,13 +2,13 @@
 
 ## 1. Accès et Connexion à l'Espace d'Administration
 1. Se rendre sur le site public et cliquer sur le lien discret **"Administration CMS"** situé tout en bas dans le pied de page (ou ajouter directement `#admin` à l'URL, ex: `votresite.com/#admin`).
-2. S'authentifier à l'aide de votre token d'accès personnel GitHub (PAT) sécurisé.
+2. S'authentifier à l'aide de votre token d'accès personnel GitHub (PAT) sécurisé (doté des droits `repo`). Le système valide automatiquement les identifiants auprès de l'API GitHub et stocke la session de manière sécurisée (`sessionStorage`).
 
 ## 2. Édition des Pages Fixes (Pages Statiques)
 - Sélectionner l'onglet **Pages Statiques** dans le menu de l'espace d'administration.
 - Choisir la page à modifier dans le gestionnaire.
 - Modifier les champs textuels et le contenu Markdown.
-- Valider l'enregistrement : cela génère automatiquement un commit sur le dépôt GitHub et actualise le site en arrière-plan.
+- Valider l'enregistrement : cela génère automatiquement un commit sur le dépôt GitHub et actualise le site en arrière-plan via le pipeline de déploiement.
 
 ## 3. Gestion du Blog et des Articles
 - Sélectionner l'onglet **Blog** dans le menu d'administration.

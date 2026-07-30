@@ -107,7 +107,7 @@
 | **BK-01** | Audit et Extraction des Contenus de la v1.0 existante | **Réalisé** |
 | **BK-02** | Refactorisation du Frontend React (lecture des Markdown) | **Réalisé** |
 | **BK-03** | Service API GitHub (Commit automatique) | **Réalisé** |
-| **BK-04** | Authentification Admin (Token GitHub) | **Réalisé** |
+| **BK-04** | Authentification Admin (Token GitHub) | **Réalis]é** |
 | **BK-05** | Interface Dashboard Admin (UI) | **Réalisé** |
 | **BK-06** | Éditeur des Pages Statiques | **Réalisé** |
 | **BK-07** | Gestionnaire d'Articles de Blog (CRUD) | **Réalisé** |
@@ -118,3 +118,6 @@
 | **BK-12** | Configuration des secrets et des variables d'environnement CI/CD OVH | **Réalisé** |
 | **BK-13** | Configuration des Secrets sur le dépôt GitHub | **À faire** |
 | **BK-14** | Vérification et ajustement de l'emplacement des fichiers racines sur l'hébergeur OVH (`./` vs `www/` ou `public_html/`) | **À faire** |
+| **BK-15** | Automatisation du déploiement GitHub Pages via GitHub Actions et correction du routage SPA / Base Vite | **Réalisé** |
+| **BK-16** | Correction de l'authentification admin (`AdminLogin.jsx` - compatibilité des props de succès) | **Réalisé** |
+```[cite: 1]
