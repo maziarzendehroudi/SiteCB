@@ -13,7 +13,6 @@ export default function App() {
   const [githubToken, setGithubToken] = useState(() => localStorage.getItem('github_token') || '');
 
   useEffect(() => {
-    // Si on est en vue admin, on ne charge pas les pages publiques
     if (isAdminView) return;
 
     async function load() {
@@ -23,22 +22,13 @@ export default function App() {
         setPageData(data);
       } catch (e) {
         console.error("Erreur de chargement de la page :", e);
-        setPageData({ meta: { title: "Erreur" }, content: "# Page introuvable\n\nLe contenu demandé n'existe pas encore." });
+        setPageData({ meta: { title: "Erreur" }, content: "<section class='text-section'><div class='container'><h1>Page introuvable</h1><p>Le contenu demandé n'existe pas encore.</p></div></section>" });
       } finally {
         setLoading(false);
       }
     }
     load();
   }, [currentSlug, isAdminView]);
-
-  const navLinks = [
-    { label: 'Accueil', slug: 'home' },
-    { label: 'Pour qui ?', slug: 'pour-qui' },
-    { label: 'Où me trouver ?', slug: 'contact' },
-    { label: 'A propos', slug: 'a-propos' },
-    { label: 'Cadre et tarifs', slug: 'cadre-et-tarifs' },
-    { label: 'Blog', slug: 'blog' },
-  ];
 
   const handleLogin = (token) => {
     localStorage.setItem('github_token', token);
@@ -50,7 +40,6 @@ export default function App() {
     setGithubToken('');
   };
 
-  // Si l'utilisateur a cliqué sur le lien Admin dans le footer
   if (isAdminView) {
     return (
       <div className="site-wrapper" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -89,52 +78,60 @@ export default function App() {
           </div>
         </div>
         <nav className="navbar">
-          <ul className="nav-menu" style={{ display: 'flex', listStyle: 'none', gap: '1.5rem', padding: 0, cursor: 'pointer' }}>
-            {navLinks.map((link) => (
-              <li key={link.slug}>
-                <a 
-                  onClick={(e) => { e.preventDefault(); setCurrentSlug(link.slug); }}
-                  style={{ 
-                    color: currentSlug === link.slug ? 'var(--wix-nav-active, #4CAF50)' : 'inherit', 
-                    textDecoration: 'none',
-                    fontWeight: currentSlug === link.slug ? 'bold' : 'normal'
-                  }}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+          <ul className="nav-menu">
+            <li className={currentSlug === 'home' ? 'active' : ''}>
+              <a href="#home" onClick={(e) => { e.preventDefault(); setCurrentSlug('home'); }}>Accueil</a>
+            </li>
+            <li className={`has-submenu ${currentSlug.startsWith('pour-qui') ? 'active' : ''}`}>
+              <a href="#pour-qui" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui'); }}>Pour qui ?</a>
+              <ul className="submenu">
+                <li><a href="#enfants" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-enfants'); }}>Enfants</a></li>
+                <li><a href="#adolescents" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adolescents'); }}>Adolescents</a></li>
+                <li><a href="#adultes" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adultes'); }}>Adultes</a></li>
+              </ul>
+            </li>
+            <li className={currentSlug === 'contact' ? 'active' : ''}>
+              <a href="#contact" onClick={(e) => { e.preventDefault(); setCurrentSlug('contact'); }}>Où me trouver ?</a>
+            </li>
+            <li className={currentSlug === 'a-propos' ? 'active' : ''}>
+              <a href="#a-propos" onClick={(e) => { e.preventDefault(); setCurrentSlug('a-propos'); }}>A propos</a>
+            </li>
+            <li className={currentSlug === 'cadre-et-tarifs' ? 'active' : ''}>
+              <a href="#cadre-et-tarifs" onClick={(e) => { e.preventDefault(); setCurrentSlug('cadre-et-tarifs'); }}>Cadre et tarifs</a>
+            </li>
+            <li className={currentSlug === 'blog' ? 'active' : ''}>
+              <a href="#blog" onClick={(e) => { e.preventDefault(); setCurrentSlug('blog'); }}>Blog</a>
+            </li>
           </ul>
         </nav>
       </header>
 
       <main>
-        <section className="text-section" style={{ padding: '4rem 0' }}>
-          <div className="container">
-            {loading ? (
+        {loading ? (
+          <section className="text-section" style={{ padding: '4rem 0' }}>
+            <div className="container">
               <p>Chargement en cours...</p>
-            ) : (
-              pageData && (
-                <div 
-                  className="markdown-content" 
-                  dangerouslySetInnerHTML={{ __html: marked.parse(pageData.content) }} 
-                />
-              )
-            )}
-          </div>
-        </section>
+            </div>
+          </section>
+        ) : (
+          pageData && (
+            <div 
+              className="markdown-content" 
+              dangerouslySetInnerHTML={{ __html: marked.parse(pageData.content) }} 
+            />
+          )
+        )}
       </main>
 
       <footer>
-        <div className="footer-container" style={{ padding: '2rem 0', textAlign: 'center', borderTop: '1px solid #eee', fontSize: '0.9rem', color: '#666' }}>
+        <div className="footer-container">
           <div>Camille Bongue - Psychothérapeute - Psychanalyste - 07 68 99 07 07</div>
-          <div style={{ marginTop: '1rem' }}>
+          <div>
             <a 
               href="#admin" 
               onClick={(e) => { e.preventDefault(); setIsAdminView(true); }}
-              style={{ color: '#999', textDecoration: 'none', fontSize: '0.8rem' }}
             >
-              Accès Administrateur (CMS)
+              Politique de confidentialité
             </a>
           </div>
         </div>
