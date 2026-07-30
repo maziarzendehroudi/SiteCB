@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function AdminLogin({ onLoginSuccess }) {
+export default function AdminLogin({ onLogin, onLoginSuccess }) {
   const [tokenInput, setTokenInput] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ export default function AdminLogin({ onLoginSuccess }) {
     }
 
     try {
-      // Test rapide de validité du token via l'API GitHub (appel à l'utilisateur authentifié)
+      // Test rapide de validité du token via l'API GitHub
       const res = await fetch('https://api.github.com/user', {
         headers: {
           'Authorization': `Bearer ${tokenInput.trim()}`,
@@ -31,12 +31,18 @@ export default function AdminLogin({ onLoginSuccess }) {
 
       const userData = await res.json();
       
-      // Stockage sécurisé en session uniquement
+      // Stockage sécurisé
       sessionStorage.setItem('github_admin_token', tokenInput.trim());
       sessionStorage.setItem('github_admin_user', userData.login);
 
       setLoading(false);
-      onLoginSuccess(tokenInput.trim());
+      
+      // Appel de la fonction de succès (quel que soit son nom dans le parent)
+      if (typeof onLogin === 'function') {
+        onLogin(tokenInput.trim());
+      } else if (typeof onLoginSuccess === 'function') {
+        onLoginSuccess(tokenInput.trim());
+      }
 
     } catch (err) {
       setError(err.message || "Échec de l'authentification.");
