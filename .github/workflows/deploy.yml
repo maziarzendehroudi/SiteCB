@@ -24,6 +24,10 @@ jobs:
 
       - name: 4. Build de l'application React / Vite
         run: npm run build
+        env:
+          VITE_GITHUB_OWNER: ${{ secrets.VITE_GITHUB_OWNER }}
+          VITE_GITHUB_REPO: ${{ secrets.VITE_GITHUB_REPO }}
+          VITE_GITHUB_BRANCH: ${{ secrets.VITE_GITHUB_BRANCH }}
 
       - name: 5. Déploiement sur l'hébergement OVH via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -32,4 +36,4 @@ jobs:
           username: ${{ secrets.OVH_FTP_USERNAME }}
           password: ${{ secrets.OVH_FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: ./ # Ajuster selon la racine du site sur l'hébergement OVH (ex: www/ ou public_html/)
+          server-dir: ./ # Ajuster si nécessaire vers ./www/ ou ./public_html/ selon la configuration de ton hébergement OVH

@@ -5,6 +5,33 @@
 const GITHUB_API_BASE = 'https://api.github.com';
 
 /**
+ * Encode une chaîne de caractères UTF-8 en Base64 de manière sécurisée (compatible accents)
+ */
+function encodeUTF8ToBase64(str) {
+  const utf8Bytes = new TextEncoder().encode(str);
+  let binaryString = '';
+  const len = utf8Bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binaryString += String.fromCharCode(utf8Bytes[i]);
+  }
+  return btoa(binaryString);
+}
+
+/**
+ * Décode une chaîne Base64 en texte UTF-8 lisible (utile pour récupérer le contenu des fichiers)
+ */
+export function decodeBase64ToUTF8(base64Str) {
+  const cleanedBase64 = base64Str.replace(/\s/g, '');
+  const binaryString = atob(cleanedBase64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
+/**
  * Enregistre ou met à jour un fichier Markdown dans le dépôt GitHub du client.
  * 
  * @param {Object} params
@@ -34,6 +61,7 @@ export async function saveFileToGitHub({
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
       }
     });
 
@@ -42,13 +70,8 @@ export async function saveFileToGitHub({
       sha = fileData.sha;
     }
 
-    // 2. Encoder le contenu en Base64 (requis par l'API GitHub)
-    // Utilisation de btoa avec support UTF-8 propre
-    const encodedContent = btoa(
-      encodeURIComponent(content).replace(/%([0-9A-F]{2})/g, (match, p1) =>
-        String.fromCharCode(parseInt(p1, 16))
-      )
-    );
+    // 2. Encoder le contenu en Base64 compatible UTF-8 via TextEncoder
+    const encodedContent = encodeUTF8ToBase64(content);
 
     // 3. Envoyer la requête PUT pour créer ou mettre à jour le fichier
     const putResponse = await fetch(url, {
@@ -57,6 +80,7 @@ export async function saveFileToGitHub({
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
         'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28'
       },
       body: JSON.stringify({
         message: message,
