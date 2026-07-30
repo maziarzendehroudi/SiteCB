@@ -9,7 +9,7 @@
 ## 2. Vue d'ensemble & Stack Technique
 - **Framework Frontend :** React (via Vite)
 - **Linter :** Oxlint
-- **Gestion du Contenu :** Fichiers Markdown (`.md`) avec frontmatter (`gray-matter`) et parsing HTML (`marked`)
+- **Gestion du Contenu :** Fichiers Markdown (`.md`) avec frontmatter YAML et parsing HTML natif sécurisé pour le frontend.
 - **Hébergement & Déploiement :** GitHub Pages / GitHub Actions / OVH
 - **CMS Headless :** Intégration Git-backed via l'API REST GitHub (Service de commit automatique, authentification par Token PAT, éditeurs dédiés pour le blog et les médias).
 
@@ -57,13 +57,22 @@
 `├── cadre-et-tarifs.html`
 `├── contact.html`
 `├── content`
+`│   ├── blog`
+`│   │   ├── article-couple.md`
+`│   │   ├── article-difference.md`
+`│   │   ├── article-doudou.md`
+`│   │   ├── article-jeu.md`
+`│   │   ├── article-langage.md`
+`│   │   └── article-secret.md`
 `│   └── pages`
 `│       ├── a-propos.md`
 `│       ├── blog.md`
 `│       ├── cadre-et-tarifs.md`
 `│       ├── contact.md`
 `│       ├── home.md`
+`│       ├── pour-qui-adolescents.md`
 `│       ├── pour-qui-adultes.md`
+`│       ├── pour-qui-enfants.md`
 `│       └── pour-qui.md`
 `├── docs`
 `│   ├── architecture.md`
@@ -107,7 +116,7 @@
 | **BK-01** | Audit et Extraction des Contenus de la v1.0 existante | **Réalisé** |
 | **BK-02** | Refactorisation du Frontend React (lecture des Markdown) | **Réalisé** |
 | **BK-03** | Service API GitHub (Commit automatique) | **Réalisé** |
-| **BK-04** | Authentification Admin (Token GitHub) | **Réalis]é** |
+| **BK-04** | Authentification Admin (Token GitHub) | **Réalisé** |
 | **BK-05** | Interface Dashboard Admin (UI) | **Réalisé** |
 | **BK-06** | Éditeur des Pages Statiques | **Réalisé** |
 | **BK-07** | Gestionnaire d'Articles de Blog (CRUD) | **Réalisé** |
@@ -120,4 +129,5 @@
 | **BK-14** | Vérification et ajustement de l'emplacement des fichiers racines sur l'hébergeur OVH (`./` vs `www/` ou `public_html/`) | **À faire** |
 | **BK-15** | Automatisation du déploiement GitHub Pages via GitHub Actions et correction du routage SPA / Base Vite | **Réalisé** |
 | **BK-16** | Correction de l'authentification admin (`AdminLogin.jsx` - compatibilité des props de succès) | **Réalisé** |
-```[cite: 1]
+| **BK-17** | Restitution intégrale de la mise en page d'origine v1.0 (Home, À propos, Pour qui / sous-pages, Cadre & Tarifs, Blog & Articles complets) | **Réalisé** |
+| **BK-18** | Remplacement de `gray-matter` par un parseur frontmatter natif navigateur dans `contentService.js` (suppression des erreurs de build Rolldown/Buffer) | **Réalisé** |
