@@ -5,6 +5,14 @@ import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import './index.css';
 
+// Configuration de marked pour autoriser et parser correctement le HTML brut intégré dans les .md
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  headerIds: false,
+  mangle: false,
+});
+
 export default function App() {
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,10 +27,24 @@ export default function App() {
       setLoading(true);
       try {
         const data = await getPageContent(currentSlug);
-        setPageData(data);
+        
+        // Ajustement automatique des chemins d'images relatifs pour GitHub Pages (/SiteCB/)
+        let processedContent = data.content;
+        if (processedContent) {
+          processedContent = processedContent
+            .replace(/src="assets\//g, 'src="/SiteCB/assets/')
+            .replace(/url\('assets\//g, "url('/SiteCB/assets/")
+            .replace(/url\("assets\//g, 'url("/SiteCB/assets/')
+            .replace(/url\(assets\//g, 'url(/SiteCB/assets/');
+        }
+
+        setPageData({ ...data, content: processedContent });
       } catch (e) {
         console.error("Erreur de chargement de la page :", e);
-        setPageData({ meta: { title: "Erreur" }, content: "<section class='text-section'><div class='container'><h1>Page introuvable</h1><p>Le contenu demandé n'existe pas encore.</p></div></section>" });
+        setPageData({ 
+          meta: { title: "Erreur" }, 
+          content: "<section class='text-section'><div class='container'><h1>Page introuvable</h1><p>Le contenu demandé n'existe pas encore.</p></div></section>" 
+        });
       } finally {
         setLoading(false);
       }
@@ -78,6 +100,12 @@ export default function App() {
           </div>
         </div>
         <nav className="navbar">
+          <div className="menu-toggle" id="mobile-menu" onClick={() => {
+            const navMenuEl = document.querySelector('.nav-menu');
+            if (navMenuEl) navMenuEl.style.display = navMenuEl.style.display === 'flex' ? 'none' : 'flex';
+          }}>
+            <span></span><span></span><span></span>
+          </div>
           <ul className="nav-menu">
             <li className={currentSlug === 'home' ? 'active' : ''}>
               <a href="#home" onClick={(e) => { e.preventDefault(); setCurrentSlug('home'); }}>Accueil</a>
