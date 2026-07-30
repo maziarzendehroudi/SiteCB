@@ -1,8 +1,8 @@
 import matter from 'gray-matter';
 
-// Importe tous les fichiers .md situés à la racine dans content/pages/ et content/blog/
-const pageFiles = import.meta.glob('../content/pages/*.md', { query: '?raw', import: 'default' });
-const blogFiles = import.meta.glob('../content/blog/*.md', { query: '?raw', import: 'default' });
+// Importe tous les fichiers .md en remontant à la racine depuis src/services/
+const pageFiles = import.meta.glob('../../content/pages/*.md', { query: '?raw', import: 'default' });
+const blogFiles = import.meta.glob('../../content/blog/*.md', { query: '?raw', import: 'default' });
 
 /**
  * Récupère le contenu et les métadonnées d'une page statique par son slug
