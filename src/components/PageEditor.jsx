@@ -34,17 +34,20 @@ export default function PageEditor({ onBack }) {
   const repo = 'SiteCB';
   const token = localStorage.getItem('github_token') || sessionStorage.getItem('github_admin_token');
 
-  // Parser intelligent de la page active en blocs riches (Titres, Paragraphes, Citations, Images/Parallaxes)
+  // Parser intelligent de la page active en blocs riches
   useEffect(() => {
     async function fetchPageContent() {
       setLoading(true);
       setMessage(null);
       setEditingIndex(null); // Reset édition au changement de page
       try {
-        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${selectedPage.path}`, {
+        // Ajout d'un timestamp pour forcer le contournement du cache GitHub
+        const timestamp = new Date().getTime();
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${selectedPage.path}?t=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/vnd.github+json',
+            'If-None-Match': '' // Force GitHub à ne pas utiliser l'ETag en cache
           }
         });
 
@@ -67,11 +70,9 @@ export default function PageEditor({ onBack }) {
 
           const parsedBlocks = [];
 
-          // Découpage séquentiel des éléments du body
           const lines = body.split('\n');
           let currentText = '';
 
-          // Recherche des citations spécifiques (.citation)
           const citMatch = body.match(/class="citation"[^>]*>([\s\S]*?)<\/p>/i);
           const autMatch = body.match(/class="auteur"[^>]*>([\s\S]*?)<\/p>/i);
 
@@ -79,31 +80,26 @@ export default function PageEditor({ onBack }) {
             parsedBlocks.push({ type: 'citation', text: citMatch[1].trim(), author: autMatch ? autMatch[1].trim() : '' });
           }
 
-          // Extraction des H1
           const h1Match = body.match(/<h1[^>]*>(.*?)<\/h1>/i) || body.match(/^#\s+(.*)$/m);
           if (h1Match) {
             parsedBlocks.push({ type: 'heading1', content: h1Match[1].trim() });
           }
 
-          // Extraction des H2
           const h2Matches = [...body.matchAll(/<h2[^>]*>(.*?)<\/h2>/gi)];
           h2Matches.forEach(m => {
             parsedBlocks.push({ type: 'heading2', content: m[1].trim() });
           });
 
-          // Extraction des paragraphes standards
           const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
           let match;
           while ((match = pRegex.exec(body)) !== null) {
             const innerHtml = match[1];
-            // Ignorer les paragraphes de citation/auteur déjà pris en compte
             if (innerHtml.includes('class="citation"') || innerHtml.includes('class="auteur"')) continue;
             
             const cleanText = innerHtml.replace(/<br\s*\/?>/gi, '\n');
             parsedBlocks.push({ type: 'paragraph', content: cleanText });
           }
 
-          // Extraction des images / parallaxes
           const imgMatches = [...body.matchAll(/background-image:\s*url\('?(assets\/img\/[^']+)'?\)/gi)];
           imgMatches.forEach(m => {
             parsedBlocks.push({ type: 'parallax', content: m[1] });
@@ -137,7 +133,7 @@ export default function PageEditor({ onBack }) {
     if (type === 'parallax') newBlock = { type, content: 'assets/img/apropos1.jpg' };
     
     setBlocks([...blocks, newBlock]);
-    setEditingIndex(blocks.length); // Ouvre directement le nouveau bloc en édition
+    setEditingIndex(blocks.length);
   };
 
   const handleBlockChange = (index, field, value) => {
@@ -153,7 +149,6 @@ export default function PageEditor({ onBack }) {
     setEditingIndex(null);
   };
 
-  // Logique de Drag & Drop
   const handleDragStart = (e, position) => {
     dragItem.current = position;
   };
@@ -169,7 +164,6 @@ export default function PageEditor({ onBack }) {
       _blocks.splice(dragOverItem.current, 0, draggedItemContent);
       setBlocks(_blocks);
       
-      // Ajuster l'index d'édition si nécessaire
       if (editingIndex === dragItem.current) {
         setEditingIndex(dragOverItem.current);
       } else {
@@ -180,7 +174,6 @@ export default function PageEditor({ onBack }) {
     dragOverItem.current = null;
   };
 
-  // Reconstitution complète du Markdown d'origine
   const generateMarkdownContent = () => {
     let bodyContent = `<section class="text-section">\n    <div class="container" style="max-width: 980px; margin: 0 auto; padding: 0 2rem;">\n`;
 
@@ -215,7 +208,7 @@ ${bodyContent}`;
   const handleSave = async () => {
     setSaving(true);
     setMessage(null);
-    setEditingIndex(null); // Quitter le mode édition avant sauvegarde
+    setEditingIndex(null);
 
     const finalContent = generateMarkdownContent();
     const result = await saveFileToGitHub({
@@ -246,7 +239,6 @@ ${bodyContent}`;
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
       
-      {/* BARRE D'OUTILS SUPÉRIEURE FIXE */}
       <div style={{ position: 'sticky', top: 0, zIndex: 9999, backgroundColor: '#2f2f2f', color: '#ffffff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a3a3a3', fontSize: '0.9rem', fontWeight: 500 }}>
@@ -289,7 +281,6 @@ ${bodyContent}`;
       {loading ? (
         <div style={{ textAlign: 'center', padding: '8rem 0', color: 'var(--text)', fontSize: '1.1rem' }}>Chargement de la page...</div>
       ) : (
-        /* VUE ÉDITEUR WYSIWYG (IDENTIQUE AU SITE PUBLIC) */
         <div className="site-wrapper" style={{ flex: 1, backgroundColor: 'transparent', textAlign: 'left' }}>
           <main className="markdown-content">
             <section className="text-section" style={{ padding: '2rem 0' }}>
@@ -302,7 +293,7 @@ ${bodyContent}`;
                     return (
                       <div 
                         key={index} 
-                        draggable={!isEditing} // Désactiver le drag pendant l'édition
+                        draggable={!isEditing}
                         onDragStart={(e) => handleDragStart(e, index)}
                         onDragEnter={(e) => handleDragEnter(e, index)}
                         onDragEnd={handleDragEnd}
@@ -335,7 +326,6 @@ ${bodyContent}`;
                         }}
                       >
                         
-                        {/* BOUTONS D'ACTION FLOTTANTS (Visibles au survol) */}
                         {!isEditing && (
                           <div 
                             className="block-actions"
@@ -352,7 +342,6 @@ ${bodyContent}`;
                           </div>
                         )}
 
-                        {/* MODE ÉDITION (Formulaire) */}
                         {isEditing ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
@@ -389,7 +378,6 @@ ${bodyContent}`;
                           </div>
                         ) : (
                           
-                          /* MODE VUE (Aperçu identique au site public) */
                           <div style={{ pointerEvents: 'none' }}>
                             {block.type === 'heading1' && (
                               <h1 style={{ textAlign: 'center' }}>{block.content}</h1>
@@ -437,7 +425,6 @@ ${bodyContent}`;
                   })}
                 </div>
 
-                {/* BOUTONS D'AJOUT DE NOUVEAUX BLOCS */}
                 <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem', marginTop: '4rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
                   <button type="button" onClick={() => handleAddBlock('paragraph')} style={{ padding: '0.6rem 1.2rem', backgroundColor: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>+ Paragraphe</button>
                   <button type="button" onClick={() => handleAddBlock('heading2')} style={{ padding: '0.6rem 1.2rem', backgroundColor: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>+ Sous-titre</button>
