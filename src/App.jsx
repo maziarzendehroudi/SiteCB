@@ -28,16 +28,20 @@ export default function App() {
       try {
         const data = await getPageContent(currentSlug);
         
-// Ajustement automatique des chemins d'images relatifs pour GitHub Pages (/SiteCB/)
+// Ajustement automatique des chemins d'images pour le build et le dev
         let processedContent = data.content;
         if (processedContent) {
+          const baseUrl = import.meta.env.BASE_URL || '/';
+          // S'assure que baseUrl se termine par un /
+          const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+          
           processedContent = processedContent
-            .replace(/src="assets\//g, 'src="/SiteCB/assets/')
-            .replace(/src='assets\//g, "src='/SiteCB/assets/")
-            .replace(/src="\/assets\//g, 'src="/SiteCB/assets/')
-            .replace(/url\('assets\//g, "url('/SiteCB/assets/")
-            .replace(/url\("assets\//g, 'url("/SiteCB/assets/')
-            .replace(/url\(assets\//g, 'url(/SiteCB/assets/');
+            .replace(/src="assets\/img\//g, `src="${base}assets/img/`)
+            .replace(/src='assets\/img\//g, `src='${base}assets/img/`)
+            .replace(/src="\/assets\/img\//g, `src="${base}assets/img/`)
+            .replace(/url\('assets\/img\//g, `url('${base}assets/img/`)
+            .replace(/url\("assets\/img\//g, `url("${base}assets/img/`)
+            .replace(/url\(assets\/img\//g, `url(${base}assets/img/`);
         }
 
         setPageData({ ...data, content: processedContent });
