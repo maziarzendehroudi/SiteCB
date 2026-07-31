@@ -64,7 +64,7 @@ export default function AdminDashboard({ username, onLogout, onNavigate }) {
             onMouseOver={(e) => e.currentTarget.style.borderColor = '#A3B1A9'}
             onMouseOut={(e) => e.currentTarget.style.borderColor = '#e6e2dd'}
           >
-            <div style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', marginBottom: '0.75rem'}}, style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', marginBottom: '0.75rem' }}>Gestion des Médias</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', marginBottom: '0.75rem' }}>Gestion des Médias</div>
             <p style={{ fontSize: '0.95rem', color: '#666', margin: 0, lineHeight: 1.5 }}>
               Importer et organiser les images utilisées dans les pages et les articles.
             </p>
