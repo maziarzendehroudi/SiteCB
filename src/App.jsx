@@ -28,11 +28,13 @@ export default function App() {
       try {
         const data = await getPageContent(currentSlug);
         
-        // Ajustement automatique des chemins d'images relatifs pour GitHub Pages (/SiteCB/)
+// Ajustement automatique des chemins d'images relatifs pour GitHub Pages (/SiteCB/)
         let processedContent = data.content;
         if (processedContent) {
           processedContent = processedContent
             .replace(/src="assets\//g, 'src="/SiteCB/assets/')
+            .replace(/src='assets\//g, "src='/SiteCB/assets/")
+            .replace(/src="\/assets\//g, 'src="/SiteCB/assets/')
             .replace(/url\('assets\//g, "url('/SiteCB/assets/")
             .replace(/url\("assets\//g, 'url("/SiteCB/assets/')
             .replace(/url\(assets\//g, 'url(/SiteCB/assets/');
