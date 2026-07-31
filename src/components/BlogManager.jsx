@@ -19,7 +19,7 @@ export default function BlogManager({ onBack }) {
 
   const owner = 'maziarzendehroudi';
   const repo = 'SiteCB';
-  const token = sessionStorage.getItem('github_admin_token');
+  const token = localStorage.getItem('github_token') || sessionStorage.getItem('github_admin_token');
 
   // Charger la liste des articles depuis le dossier /content/blog/
   const fetchArticles = async () => {
