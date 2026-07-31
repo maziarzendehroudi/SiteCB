@@ -2,63 +2,71 @@ import React from 'react';
 
 export default function AdminDashboard({ username, onLogout, onNavigate }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div style={{ minHeight: '100vh', backgroundColor: '#fcfbf9', display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
       {/* Barre de navigation supérieure */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-lg font-semibold text-gray-900">CMS Admin</h1>
-          <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
-            Connecté en tant que <span className="font-medium text-gray-900">{username}</span>
+      <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e6e2dd', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <h1 style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', margin: 0 }}>CMS Admin</h1>
+          <span style={{ fontSize: '0.8rem', backgroundColor: '#f4f2ee', color: '#4a4a4a', padding: '0.25rem 0.75rem', borderRadius: '50px' }}>
+            Connecté <span style={{ fontWeight: 500 }}>{username || 'au dépôt GitHub'}</span>
           </span>
         </div>
         <button
           onClick={onLogout}
-          className="text-sm text-gray-600 hover:text-red-600 transition-colors font-medium"
+          style={{ fontSize: '0.9rem', color: '#666', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}
+          onMouseOver={(e) => e.target.style.color = '#dc2626'}
+          onMouseOut={(e) => e.target.style.color = '#666'}
         >
           Déconnexion
         </button>
       </header>
 
       {/* Contenu principal / Grille des modules */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-light text-gray-900">Tableau de bord</h2>
-          <p className="text-sm text-gray-600 mt-1">
+      <main style={{ flex: 1, maxWidth: '1000px', width: '100%', margin: '0 auto', padding: '3rem 2rem' }}>
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 300, color: '#4a4a4a', margin: '0 0 0.5rem 0' }}>Tableau de bord</h2>
+          <p style={{ fontSize: '1.05rem', color: '#666', margin: 0 }}>
             Sélectionnez un module ci-dessous pour gérer le contenu de votre site.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
           {/* Carte Pages Statiques */}
           <div 
             onClick={() => onNavigate('pages')}
-            className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-400 cursor-pointer transition-all shadow-sm hover:shadow"
+            style={{ backgroundColor: '#ffffff', padding: '2rem', borderRadius: '4px', border: '1px solid #e6e2dd', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+            onMouseOver={(e) => e.currentTarget.style.borderColor = '#A3B1A9'}
+            onMouseOut={(e) => e.currentTarget.style.borderColor = '#e6e2dd'}
           >
-            <div className="text-gray-900 font-semibold mb-2">Pages Statiques</div>
-            <p className="text-sm text-gray-600">
-              Modifier le contenu textuel et la structure des pages principales du site (Accueil, Cabinet, Approche, etc.).
+            <div style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', marginBottom: '0.75rem' }}>Pages Statiques</div>
+            <p style={{ fontSize: '0.95rem', color: '#666', margin: 0, lineHeight: 1.5 }}>
+              Modifier le contenu textuel et la structure des pages principales du site (Accueil, À propos, Cadre & tarifs, etc.).
             </p>
           </div>
 
           {/* Carte Blog */}
           <div 
             onClick={() => onNavigate('blog')}
-            className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-400 cursor-pointer transition-all shadow-sm hover:shadow"
+            style={{ backgroundColor: '#ffffff', padding: '2rem', borderRadius: '4px', border: '1px solid #e6e2dd', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+            onMouseOver={(e) => e.currentTarget.style.borderColor = '#A3B1A9'}
+            onMouseOut={(e) => e.currentTarget.style.borderColor = '#e6e2dd'}
           >
-            <div className="text-gray-900 font-semibold mb-2">Articles de Blog</div>
-            <p className="text-sm text-gray-600">
-              Rédiger, éditer ou supprimer des articles et réflexions publiés sur le site.
+            <div style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', marginBottom: '0.75rem' }}>Articles de Blog</div>
+            <p style={{ fontSize: '0.95rem', color: '#666', margin: 0, lineHeight: 1.5 }}>
+              Rédiger, éditer ou supprimer des articles et réflexions publiés sur le blog.
             </p>
           </div>
 
           {/* Carte Médias */}
           <div 
             onClick={() => onNavigate('media')}
-            className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-400 cursor-pointer transition-all shadow-sm hover:shadow"
+            style={{ backgroundColor: '#ffffff', padding: '2rem', borderRadius: '4px', border: '1px solid #e6e2dd', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+            onMouseOver={(e) => e.currentTarget.style.borderColor = '#A3B1A9'}
+            onMouseOut={(e) => e.currentTarget.style.borderColor = '#e6e2dd'}
           >
-            <div className="text-gray-900 font-semibold mb-2">Gestion des Médias</div>
-            <p className="text-sm text-gray-600">
-              Importer et organiser les images et documents utilisés dans les pages et les articles.
+            <div style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', marginBottom: '0.75rem'}}, style={{ fontSize: '1.2rem', fontWeight: 400, color: '#4a4a4a', marginBottom: '0.75rem' }}>Gestion des Médias</div>
+            <p style={{ fontSize: '0.95rem', color: '#666', margin: 0, lineHeight: 1.5 }}>
+              Importer et organiser les images utilisées dans les pages et les articles.
             </p>
           </div>
         </div>
