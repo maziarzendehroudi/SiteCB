@@ -19,20 +19,18 @@ export default function PageEditor({ onBack }) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Champs structurés
+  // Données de la page
   const [metaTitle, setMetaTitle] = useState('');
   const [pageSlug, setPageSlug] = useState('');
   const [mainTitle, setMainTitle] = useState('');
   const [paragraphs, setParagraphs] = useState([]);
   const [parallaxImg, setParallaxImg] = useState('');
-  const [rawFallback, setRawFallback] = useState('');
-  const [isRawMode, setIsRawMode] = useState(false);
 
   const owner = 'maziarzendehroudi';
   const repo = 'SiteCB';
   const token = localStorage.getItem('github_token') || sessionStorage.getItem('github_admin_token');
 
-  // Charger et parser la page sélectionnée
+  // Charger et parser la page sélectionnée depuis GitHub
   useEffect(() => {
     async function fetchPageContent() {
       setLoading(true);
@@ -51,8 +49,6 @@ export default function PageEditor({ onBack }) {
         const decodedContent = decodeURIComponent(
           atob(data.content).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
         );
-
-        setRawFallback(decodedContent);
 
         const fmMatch = decodedContent.match(/^---\s*([\s\S]*?)\s*---\s*([\s\S]*)$/);
         if (fmMatch) {
@@ -97,17 +93,35 @@ export default function PageEditor({ onBack }) {
     }
   }, [selectedPage, token]);
 
-  const handleAddParagraph = () => setParagraphs([...paragraphs, 'Nouveau paragraphe...']);
+  // Gestion des blocs (réorganisation / suppression / ajout)
+  const handleAddParagraph = () => setParagraphs([...paragraphs, 'Nouveau paragraphe éditable...']);
   const handleParagraphChange = (index, value) => {
     const updated = [...paragraphs];
     updated[index] = value;
     setParagraphs(updated);
   };
   const handleDeleteParagraph = (index) => setParagraphs(paragraphs.filter((_, i) => i !== index));
+  
+  const handleMoveUp = (index) => {
+    if (index === 0) return;
+    const updated = [...paragraphs];
+    const temp = updated[index];
+    updated[index] = updated[index - 1];
+    updated[index - 1] = temp;
+    setParagraphs(updated);
+  };
 
+  const handleMoveDown = (index) => {
+    if (index === paragraphs.length - 1) return;
+    const updated = [...paragraphs];
+    const temp = updated[index];
+    updated[index] = updated[index + 1];
+    updated[index + 1] = temp;
+    setParagraphs(updated);
+  };
+
+  // Reconstruire le Markdown
   const generateMarkdownContent = () => {
-    if (isRawMode) return rawFallback;
-
     let bodyContent = '';
     if (mainTitle) {
       bodyContent += `<section class="text-section">\n    <div class="container">\n        <h1 class="main-title text-center" style="font-size: 2.2rem; margin-bottom: 2rem;">${mainTitle}</h1>\n`;
@@ -134,8 +148,7 @@ slug: "${pageSlug}"
 ${bodyContent}`;
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const handleSave = async () => {
     setSaving(true);
     setMessage(null);
 
@@ -144,21 +157,19 @@ ${bodyContent}`;
       owner,
       repo,
       path: selectedPage.path,
-      message: `Mise à jour visuelle de la page ${selectedPage.name} via CMS Admin`,
+      message: `Mise à jour visuelle in-context de la page ${selectedPage.name}`,
       content: finalContent,
       token,
     });
 
     setSaving(false);
     if (result.success) {
-      setMessage({ type: 'success', text: "Modifications enregistrées et commitées avec succès sur GitHub !" });
-      setRawFallback(finalContent);
+      setMessage({ type: 'success', text: "Modifications enregistrées et publiées sur GitHub avec succès !" });
     } else {
       setMessage({ type: 'error', text: `Erreur lors de la sauvegarde : ${result.error}` });
     }
   };
 
-  // Résolution propre de l'URL de l'image parallaxe pour l'aperçu live
   const getPreviewImageUrl = (imgpath) => {
     if (!imgpath) return '';
     const baseUrl = import.meta.env.BASE_URL || '/';
@@ -168,195 +179,154 @@ ${bodyContent}`;
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#fcfbf9', display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
-      <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e6e2dd', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <button
-          onClick={onBack}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: '0.9rem', fontWeight: 500 }}
-        >
-          ← Retour au tableau de bord
-        </button>
+    <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column' }}>
+      
+      {/* BARRE D'OUTILS FLOTTANTE SUPÉRIEURE (ADMIN) */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 9999, backgroundColor: '#2f2f2f', color: '#ffffff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button
+            onClick={onBack}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a3a3a3', fontSize: '0.9rem', fontWeight: 500 }}
+          >
+            ← Tableau de bord
+          </button>
+          <span style={{ color: '#666' }}>|</span>
           <select
             value={selectedPage.id}
             onChange={(e) => {
               const page = STATIC_PAGES.find(p => p.id === e.target.value);
               setSelectedPage(page);
             }}
-            style={{ padding: '0.4rem 1rem', backgroundColor: '#ffffff', border: '1px solid #e6e2dd', borderRadius: '4px', fontSize: '0.9rem', cursor: 'pointer', color: '#4a4a4a' }}
+            style={{ padding: '0.3rem 0.8rem', backgroundColor: '#4a4a4a', color: '#ffffff', border: '1px solid #555', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer' }}
           >
             {STATIC_PAGES.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '0.8rem', color: '#a3a3a3', fontStyle: 'italic' }}>Mode Édition Visuelle Directe</span>
           <button
             type="button"
-            onClick={() => {
-              if (!isRawMode) setRawFallback(generateMarkdownContent());
-              setIsRawMode(!isRawMode);
-            }}
-            style={{ padding: '0.4rem 1rem', background: '#f4f2ee', border: '1px solid #e6e2dd', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', color: '#4a4a4a' }}
+            onClick={handleSave}
+            disabled={saving}
+            style={{ padding: '0.5rem 1.5rem', backgroundColor: '#A3B1A9', color: '#ffffff', border: 'none', borderRadius: '4px', fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer' }}
           >
-            {isRawMode ? "Mode Éditeur Visuel" : "Mode Code Brut"}
+            {saving ? "Publication..." : "Enregistrer sur GitHub"}
           </button>
         </div>
-      </header>
+      </div>
 
       {message && (
-        <div style={{ margin: '1.5rem 2rem 0', padding: '1rem', borderRadius: '4px', fontSize: '0.9rem', backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2', color: message.type === 'success' ? '#166534' : '#991b1b', border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}` }}>
+        <div style={{ margin: '1rem 2rem 0', padding: '1rem', borderRadius: '4px', fontSize: '0.9rem', backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2', color: message.type === 'success' ? '#166534' : '#991b1b', border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}` }}>
           {message.text}
         </div>
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '6rem 0', color: '#666' }}>Chargement de la page...</div>
-      ) : isRawMode ? (
-        <main style={{ flex: 1, maxWidth: '900px', width: '100%', margin: '0 auto', padding: '2.5rem 2rem' }}>
-          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <textarea
-              rows={22}
-              value={rawFallback}
-              onChange={(e) => setRawFallback(e.target.value)}
-              style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.85rem', padding: '1rem', backgroundColor: '#ffffff', border: '1px solid #e6e2dd', borderRadius: '4px', lineHeight: 1.6 }}
-              required
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="submit"
-                disabled={saving}
-                style={{ padding: '0.75rem 2rem', backgroundColor: '#4a4a4a', color: '#ffffff', border: 'none', borderRadius: '4px', fontSize: '0.95rem', fontWeight: 500, cursor: 'pointer' }}
-              >
-                {saving ? "Enregistrement..." : "Enregistrer sur GitHub"}
-              </button>
-            </div>
-          </form>
-        </main>
+        <div style={{ textAlign: 'center', padding: '8rem 0', color: '#666', fontSize: '1.1rem' }}>Chargement de la page...</div>
       ) : (
-        /* VUE DUALE : ÉDITEUR STRUCTURÉ (GAUCHE) / APERÇU LIVE FIDÉLISÉ (DROITE) */
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1, height: 'calc(100vh - 70px)', overflow: 'hidden' }}>
-          
-          {/* COLONNE GAUCHE : FORMULAIRE DE BLOCS STRUCTURÉS */}
-          <div style={{ padding: '2rem', overflowY: 'auto', borderRight: '1px solid #e6e2dd', backgroundColor: '#fcfbf9' }}>
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '4rem' }}>
-              
-              <div style={{ backgroundColor: '#ffffff', padding: '1.25rem', borderRadius: '4px', border: '1px solid #e6e2dd', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#666', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Méta Titre (SEO)</label>
+        /* APERÇU PUBLIC EXACT AVEC CONTRÔLES D'ÉDITION INCRUSTÉS */
+        <div className="site-wrapper" style={{ flex: 1, backgroundColor: '#ffffff', textAlign: 'left' }}>
+          <main className="markdown-content">
+            <section className="text-section" style={{ backgroundColor: '#DCE2E0', padding: '4rem 0' }}>
+              <div className="container" style={{ maxWidth: '980px', margin: '0 auto', padding: '0 2rem' }}>
+                
+                {/* Édition du Titre Principal (H1) */}
+                <div style={{ marginBottom: '2rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', color: '#666', marginBottom: '0.2rem', fontWeight: 600 }}>Titre Principal (H1)</label>
                   <input
                     type="text"
-                    value={metaTitle}
-                    onChange={(e) => setMetaTitle(e.target.value)}
-                    style={{ width: '100%', padding: '0.4rem', border: '1px solid #e6e2dd', borderRadius: '4px', fontSize: '0.85rem' }}
+                    value={mainTitle}
+                    onChange={(e) => setMainTitle(e.target.value)}
+                    style={{ width: '100%', fontSize: '2.2rem', fontWeight: 300, color: '#4a4a4a', backgroundColor: 'rgba(255,255,255,0.6)', border: '1px dashed #A3B1A9', borderRadius: '4px', padding: '0.5rem 1rem', fontFamily: 'inherit', letterSpacing: '1px' }}
                   />
                 </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#666', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Image Parallaxe</label>
-                  <input
-                    type="text"
-                    value={parallaxImg}
-                    onChange={(e) => setParallaxImg(e.target.value)}
-                    placeholder="assets/img/apropos1.jpg"
-                    style={{ width: '100%', padding: '0.4rem', border: '1px solid #e6e2dd', borderRadius: '4px', fontSize: '0.85rem' }}
-                  />
-                </div>
-              </div>
 
-              <div style={{ backgroundColor: '#ffffff', padding: '1.25rem', borderRadius: '4px', border: '1px solid #e6e2dd' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#666', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Titre Principal (H1)</label>
+                {/* Blocs de Paragraphes éditables avec réorganisation */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {paragraphs.map((p, index) => (
+                    <div key={index} style={{ position: 'relative', backgroundColor: 'rgba(255,255,255,0.4)', border: '1px dashed #cbd3d0', borderRadius: '4px', padding: '1rem' }}>
+                      
+                      {/* Barre d'actions du bloc */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.3rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#777' }}>Bloc Paragraphe #{index + 1}</span>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveUp(index)}
+                            disabled={index === 0}
+                            style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '3px', padding: '0.1rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
+                            title="Déplacer vers le haut"
+                          >
+                            ↑ Monter
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveDown(index)}
+                            disabled={index === paragraphs.length - 1}
+                            style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '3px', padding: '0.1rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
+                            title="Déplacer vers le bas"
+                          >
+                            ↓ Descendre
+                          </button>
+                          {paragraphs.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteParagraph(index)}
+                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '3px', padding: '0.1rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
+                            >
+                              Supprimer
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Contenu éditable du paragraphe */}
+                      <textarea
+                        rows={3}
+                        value={p}
+                        onChange={(e) => handleParagraphChange(index, e.target.value)}
+                        style={{ width: '100%', fontSize: '1.15rem', fontWeight: 300, lineHeight: 1.6, color: '#4a4a4a', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'vertical', fontFamily: 'inherit', textAlign: 'justify' }}
+                      />
+                    </div>
+                  ))}
+
+                  <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                    <button
+                      type="button"
+                      onClick={handleAddParagraph}
+                      style={{ padding: '0.6rem 2rem', backgroundColor: '#A3B1A9', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500 }}
+                    >
+                      + Ajouter un paragraphe à la page
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* Section Image Parallaxe (si présente ou configurable) */}
+            <div style={{ padding: '2rem 0', backgroundColor: '#f4f2ee', textAlign: 'center' }}>
+              <div className="container" style={{ maxWidth: '600px', margin: '0 auto' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: '#666', marginBottom: '0.3rem', fontWeight: 600 }}>Image d'arrière-plan (Parallaxe)</label>
                 <input
                   type="text"
-                  value={mainTitle}
-                  onChange={(e) => setMainTitle(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem', border: '1px solid #e6e2dd', borderRadius: '4px', fontSize: '0.95rem', color: '#4a4a4a' }}
+                  value={parallaxImg}
+                  onChange={(e) => setParallaxImg(e.target.value)}
+                  placeholder="ex: assets/img/apropos1.jpg"
+                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.9rem', marginBottom: '1rem', backgroundColor: '#fff' }}
                 />
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 500, color: '#4a4a4a', margin: 0 }}>Paragraphes de texte</h3>
-                  <button
-                    type="button"
-                    onClick={handleAddParagraph}
-                    style={{ padding: '0.3rem 0.8rem', backgroundColor: '#A3B1A9', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-                  >
-                    + Ajouter
-                  </button>
-                </div>
-
-                {paragraphs.map((p, index) => (
-                  <div key={index} style={{ backgroundColor: '#ffffff', padding: '1rem', borderRadius: '4px', border: '1px solid #e6e2dd', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: 600 }}>Paragraphe #{index + 1}</span>
-                      {paragraphs.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteParagraph(index)}
-                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem' }}
-                        >
-                          Supprimer
-                        </button>
-                      )}
-                    </div>
-                    <textarea
-                      rows={3}
-                      value={p}
-                      onChange={(e) => handleParagraphChange(index, e.target.value)}
-                      style={{ width: '100%', padding: '0.5rem', border: '1px solid #e6e2dd', borderRadius: '4px', fontSize: '0.9rem', lineHeight: 1.5, fontFamily: 'inherit' }}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ paddingTop: '1rem' }}>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  style={{ width: '100%', padding: '0.75rem', backgroundColor: '#4a4a4a', color: '#ffffff', border: 'none', borderRadius: '4px', fontSize: '0.95rem', fontWeight: 500, cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
-                >
-                  {saving ? "Enregistrement en cours..." : "Enregistrer et publier sur GitHub"}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* COLONNE DROITE : APERÇU LIVE IDENTIQUE À LA PAGE PUBLIQUE */}
-          <div style={{ overflowY: 'auto', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ backgroundColor: '#f4f2ee', padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: '#666', borderBottom: '1px solid #e6e2dd', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Aperçu en direct (Rendu public exact)
+              {parallaxImg && (
+                <div 
+                  className="parallax-bg" 
+                  style={{ backgroundImage: `url('${getPreviewImageUrl(parallaxImg)}')`, height: '200px' }} 
+                />
+              )}
             </div>
-
-            <div className="site-wrapper" style={{ flex: 1, backgroundColor: '#ffffff', textAlign: 'left' }}>
-              <main className="markdown-content">
-                <section className="text-section">
-                  <div className="container">
-                    {mainTitle && (
-                      <h1 className="main-title text-center" style={{ fontSize: '2.2rem', marginBottom: '2rem', fontWeight: 300, color: '#4a4a4a' }}>
-                        {mainTitle}
-                      </h1>
-                    )}
-                    {paragraphs.map((p, idx) => (
-                      <p key={idx} style={{ marginBottom: '1.2rem', fontSize: '1.15rem', fontWeight: 300, textAlign: 'justify', lineHeight: 1.5, color: '#4a4a4a' }}>
-                        {p.split('\n').map((line, i) => (
-                          <React.Fragment key={i}>
-                            {line}
-                            {i < p.split('\n').length - 1 && <br />}
-                          </React.Fragment>
-                        ))}
-                      </p>
-                    ))}
-                  </div>
-                </section>
-
-                {parallaxImg && (
-                  <div 
-                    className="parallax-bg" 
-                    style={{ backgroundImage: `url('${getPreviewImageUrl(parallaxImg)}')` }} 
-                  />
-                )}
-              </main>
-            </div>
-          </div>
-
+          </main>
         </div>
       )}
     </div>
