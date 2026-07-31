@@ -3,6 +3,8 @@ import { marked } from 'marked';
 import { getPageContent } from './services/contentService';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
+import PageEditor from './components/PageEditor';
+import BlogManager from './components/BlogManager';
 import './index.css';
 
 // Configuration de marked pour autoriser et parser correctement le HTML brut intégré dans les .md
@@ -18,6 +20,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [currentSlug, setCurrentSlug] = useState('home');
   const [isAdminView, setIsAdminView] = useState(false);
+  const [adminSubView, setAdminSubView] = useState('dashboard'); // 'dashboard', 'pages', 'blog', 'media'
   const [githubToken, setGithubToken] = useState(() => localStorage.getItem('github_token') || '');
 
   useEffect(() => {
@@ -28,11 +31,10 @@ export default function App() {
       try {
         const data = await getPageContent(currentSlug);
         
-// Ajustement automatique des chemins d'images pour le build et le dev
+        // Ajustement automatique des chemins d'images pour le build et le dev
         let processedContent = data.content;
         if (processedContent) {
           const baseUrl = import.meta.env.BASE_URL || '/';
-          // S'assure que baseUrl se termine par un /
           const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
           
           processedContent = processedContent
@@ -65,7 +67,6 @@ export default function App() {
     const href = anchor.getAttribute('href');
     if (!href) return;
 
-    // Si c'est un lien vers une page .html interne
     if (href.endsWith('.html')) {
       e.preventDefault();
       const slug = href.replace('.html', '');
@@ -77,30 +78,65 @@ export default function App() {
   const handleLogin = (token) => {
     localStorage.setItem('github_token', token);
     setGithubToken(token);
+    setAdminSubView('dashboard');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('github_token');
     setGithubToken('');
+    setIsAdminView(false);
+    setAdminSubView('dashboard');
   };
 
   if (isAdminView) {
     return (
-      <div className="site-wrapper" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-          <h1 style={{ fontSize: '1.5rem', margin: 0 }}>Administration du Site</h1>
+      <div className="site-wrapper" style={{ minHeight: '100vh', backgroundColor: '#fcfbf9' }}>
+        <div style={{ padding: '1rem 2rem', background: '#fff', borderBottom: '1px solid #e6e2dd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 400, color: '#4a4a4a' }}>Administration du Site</h1>
           <button 
-            onClick={() => setIsAdminView(false)}
-            style={{ padding: '0.5rem 1rem', cursor: 'pointer', background: '#333', color: '#fff', border: 'none', borderRadius: '4px' }}
+            onClick={() => { setIsAdminView(false); setAdminSubView('dashboard'); }}
+            style={{ padding: '0.5rem 1rem', cursor: 'pointer', background: '#A3B1A9', color: '#fff', border: 'none', borderRadius: '2px', fontSize: '0.9rem' }}
           >
             ← Retour au site public
           </button>
         </div>
 
         {!githubToken ? (
-          <AdminLogin onLogin={handleLogin} />
+          <div style={{ padding: '3rem', maxWidth: '500px', margin: '0 auto', textAlign: 'left' }}>
+            <AdminLogin onLogin={handleLogin} />
+          </div>
         ) : (
-          <AdminDashboard token={githubToken} onLogout={handleLogout} />
+          <>
+            {adminSubView === 'dashboard' && (
+              <AdminDashboard 
+                username="Admin" 
+                onLogout={handleLogout} 
+                onNavigate={(view) => setAdminSubView(view)} 
+              />
+            )}
+            {adminSubView === 'pages' && (
+              <PageEditor 
+                onBack={() => setAdminSubView('dashboard')} 
+              />
+            )}
+            {adminSubView === 'blog' && (
+              <BlogManager 
+                onBack={() => setAdminSubView('dashboard')} 
+              />
+            )}
+            {adminSubView === 'media' && (
+              <div style={{ padding: '3rem', textAlign: 'left', maxWidth: '800px', margin: '0 auto' }}>
+                <button 
+                  onClick={() => setAdminSubView('dashboard')}
+                  style={{ marginBottom: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: '0.95rem' }}
+                >
+                  ← Retour au tableau de bord
+                </button>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 300, color: '#4a4a4a', marginBottom: '1rem' }}>Gestion des Médias</h2>
+                <p style={{ color: '#666' }}>Le gestionnaire de médias pour vos images et documents est accessible via votre dépôt GitHub direct.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     );
