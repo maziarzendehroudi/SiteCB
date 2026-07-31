@@ -1,5 +1,5 @@
 ---
-title: "Accueil - Camille Bongue"
+title: "Accueil - Camille Bongue2"
 slug: "home"
 ---
 
