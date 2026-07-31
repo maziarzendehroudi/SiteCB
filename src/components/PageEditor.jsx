@@ -19,18 +19,16 @@ export default function PageEditor({ onBack }) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Données de la page
+  // Méta et liste unifiée de blocs mixtes (textes, titres, images/parallaxes)
   const [metaTitle, setMetaTitle] = useState('');
   const [pageSlug, setPageSlug] = useState('');
-  const [mainTitle, setMainTitle] = useState('');
-  const [paragraphs, setParagraphs] = useState([]);
-  const [parallaxImg, setParallaxImg] = useState('');
+  const [blocks, setBlocks] = useState([]);
 
   const owner = 'maziarzendehroudi';
   const repo = 'SiteCB';
   const token = localStorage.getItem('github_token') || sessionStorage.getItem('github_admin_token');
 
-  // Charger et parser la page sélectionnée depuis GitHub
+  // Charger et parser la page sélectionnée sous forme de blocs unifiés
   useEffect(() => {
     async function fetchPageContent() {
       setLoading(true);
@@ -60,26 +58,35 @@ export default function PageEditor({ onBack }) {
           setMetaTitle(tMatch ? tMatch[1].trim() : '');
           setPageSlug(sMatch ? sMatch[1].trim() : selectedPage.id);
 
+          const parsedBlocks = [];
+
+          // Extraction du Titre principal H1
           const h1Match = body.match(/<h1[^>]*>(.*?)<\/h1>/i) || body.match(/^#\s+(.*)$/m);
-          setMainTitle(h1Match ? h1Match[1].trim() : '');
+          if (h1Match) {
+            parsedBlocks.push({ type: 'heading', content: h1Match[1].trim() });
+          }
 
-          const pMatch = body.match(/background-image:\s*url\('?(assets\/img\/[^']+)'?\)/i);
-          setParallaxImg(pMatch ? pMatch[1] : '');
-
-          const pList = [];
+          // Extraction des paragraphes et des images parallaxes dans l'ordre d'apparition approximatif
+          // On analyse le body séquentiellement ou par regex globale
           const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
           let match;
           while ((match = pRegex.exec(body)) !== null) {
-            pList.push(match[1].replace(/<br\s*\/?>/gi, '\n'));
+            const cleanText = match[1].replace(/<br\s*\/?>/gi, '\n');
+            parsedBlocks.push({ type: 'paragraph', content: cleanText });
           }
 
-          if (pList.length > 0) {
-            setParagraphs(pList);
-          } else {
-            setParagraphs([body.trim()]);
+          const pMatch = body.match(/background-image:\s*url\('?(assets\/img\/[^']+)'?\)/i);
+          if (pMatch) {
+            parsedBlocks.push({ type: 'parallax', content: pMatch[1] });
           }
+
+          if (parsedBlocks.length === 0) {
+            parsedBlocks.push({ type: 'paragraph', content: body.trim() });
+          }
+
+          setBlocks(parsedBlocks);
         } else {
-          setParagraphs([decodedContent]);
+          setBlocks([{ type: 'paragraph', content: decodedContent }]);
         }
       } catch (err) {
         setMessage({ type: 'error', text: err.message });
@@ -93,52 +100,63 @@ export default function PageEditor({ onBack }) {
     }
   }, [selectedPage, token]);
 
-  // Gestion des blocs (réorganisation / suppression / ajout)
-  const handleAddParagraph = () => setParagraphs([...paragraphs, 'Nouveau paragraphe éditable...']);
-  const handleParagraphChange = (index, value) => {
-    const updated = [...paragraphs];
-    updated[index] = value;
-    setParagraphs(updated);
+  // Manipulation des blocs unifiés
+  const handleAddBlock = (type) => {
+    const defaultContent = type === 'heading' ? 'Nouveau titre' : type === 'paragraph' ? 'Nouveau paragraphe...' : 'assets/img/apropos1.jpg';
+    setBlocks([...blocks, { type, content: defaultContent }]);
   };
-  const handleDeleteParagraph = (index) => setParagraphs(paragraphs.filter((_, i) => i !== index));
-  
+
+  const handleBlockChange = (index, value) => {
+    const updated = [...blocks];
+    updated[index].content = value;
+    setBlocks(updated);
+  };
+
+  const handleDeleteBlock = (index) => {
+    setBlocks(blocks.filter((_, i) => i !== index));
+  };
+
   const handleMoveUp = (index) => {
     if (index === 0) return;
-    const updated = [...paragraphs];
+    const updated = [...blocks];
     const temp = updated[index];
     updated[index] = updated[index - 1];
     updated[index - 1] = temp;
-    setParagraphs(updated);
+    setBlocks(updated);
   };
 
   const handleMoveDown = (index) => {
-    if (index === paragraphs.length - 1) return;
-    const updated = [...paragraphs];
+    if (index === blocks.length - 1) return;
+    const updated = [...blocks];
     const temp = updated[index];
     updated[index] = updated[index + 1];
     updated[index + 1] = temp;
-    setParagraphs(updated);
+    setBlocks(updated);
   };
 
-  // Reconstruire le Markdown
+  // Reconstitution du fichier Markdown propre
   const generateMarkdownContent = () => {
-    let bodyContent = '';
-    if (mainTitle) {
-      bodyContent += `<section class="text-section">\n    <div class="container">\n        <h1 class="main-title text-center" style="font-size: 2.2rem; margin-bottom: 2rem;">${mainTitle}</h1>\n`;
-    } else {
-      bodyContent += `<section class="text-section">\n    <div class="container">\n`;
-    }
+    let mainTitle = '';
+    let bodyContent = `<section class="text-section">\n    <div class="container">\n`;
 
-    paragraphs.forEach((p) => {
-      const formattedP = p.replace(/\n/g, '<br>\n        ');
-      bodyContent += `        <p>${formattedP}</p>\n`;
+    blocks.forEach((block) => {
+      if (block.type === 'heading') {
+        mainTitle = block.content;
+        bodyContent = `<section class="text-section">\n    <div class="container">\n        <h1 class="main-title text-center" style="font-size: 2.2rem; margin-bottom: 2rem;">${mainTitle}</h1>\n` + bodyContent.replace('<section class="text-section">\n    <div class="container">\n', '');
+      } else if (block.type === 'paragraph') {
+        const formattedP = block.content.replace(/\n/g, '<br>\n        ');
+        bodyContent += `        <p>${formattedP}</p>\n`;
+      }
     });
 
     bodyContent += `    </div>\n</section>\n`;
 
-    if (parallaxImg) {
-      bodyContent += `\n<div class="parallax-bg" style="background-image: url('${parallaxImg}');"></div>\n`;
-    }
+    // Ajouter les blocs images/parallaxes s'il y en a dans les blocs
+    blocks.forEach((block) => {
+      if (block.type === 'parallax') {
+        bodyContent += `\n<div class="parallax-bg" style="background-image: url('${block.content}');"></div>\n`;
+      }
+    });
 
     return `---
 title: "${metaTitle}"
@@ -157,7 +175,7 @@ ${bodyContent}`;
       owner,
       repo,
       path: selectedPage.path,
-      message: `Mise à jour visuelle in-context de la page ${selectedPage.name}`,
+      message: `Mise à jour complète de la page ${selectedPage.name}`,
       content: finalContent,
       token,
     });
@@ -179,9 +197,9 @@ ${bodyContent}`;
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#fcfbf9', display: 'flex', flexDirection: 'column' }}>
       
-      {/* BARRE D'OUTILS FLOTTANTE SUPÉRIEURE (ADMIN) */}
+      {/* BARRE D'OUTILS SUPÉRIEURE FLOTTANTE */}
       <div style={{ position: 'sticky', top: 0, zIndex: 9999, backgroundColor: '#2f2f2f', color: '#ffffff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button
@@ -206,7 +224,7 @@ ${bodyContent}`;
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ fontSize: '0.8rem', color: '#a3a3a3', fontStyle: 'italic' }}>Mode Édition Visuelle Directe</span>
+          <span style={{ fontSize: '0.8rem', color: '#a3a3a3', fontStyle: 'italic' }}>Édition Visuelle In-Context</span>
           <button
             type="button"
             onClick={handleSave}
@@ -227,105 +245,102 @@ ${bodyContent}`;
       {loading ? (
         <div style={{ textAlign: 'center', padding: '8rem 0', color: '#666', fontSize: '1.1rem' }}>Chargement de la page...</div>
       ) : (
-        /* APERÇU PUBLIC EXACT AVEC CONTRÔLES D'ÉDITION INCRUSTÉS */
+        /* RENDU PROCHE DE LA PAGE PUBLIQUE AVEC SURVOL DISCRET DES ACTIONS */
         <div className="site-wrapper" style={{ flex: 1, backgroundColor: '#ffffff', textAlign: 'left' }}>
           <main className="markdown-content">
             <section className="text-section" style={{ backgroundColor: '#DCE2E0', padding: '4rem 0' }}>
               <div className="container" style={{ maxWidth: '980px', margin: '0 auto', padding: '0 2rem' }}>
                 
-                {/* Édition du Titre Principal (H1) */}
-                <div style={{ marginBottom: '2rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', color: '#666', marginBottom: '0.2rem', fontWeight: 600 }}>Titre Principal (H1)</label>
-                  <input
-                    type="text"
-                    value={mainTitle}
-                    onChange={(e) => setMainTitle(e.target.value)}
-                    style={{ width: '100%', fontSize: '2.2rem', fontWeight: 300, color: '#4a4a4a', backgroundColor: 'rgba(255,255,255,0.6)', border: '1px dashed #A3B1A9', borderRadius: '4px', padding: '0.5rem 1rem', fontFamily: 'inherit', letterSpacing: '1px' }}
-                  />
-                </div>
-
-                {/* Blocs de Paragraphes éditables avec réorganisation */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  {paragraphs.map((p, index) => (
-                    <div key={index} style={{ position: 'relative', backgroundColor: 'rgba(255,255,255,0.4)', border: '1px dashed #cbd3d0', borderRadius: '4px', padding: '1rem' }}>
+                {/* FLUX UNIFIÉ DE BLOCS (TITRES, TEXTES, IMAGES) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                  {blocks.map((block, index) => (
+                    <div 
+                      key={index} 
+                      className="editable-block-wrapper"
+                      style={{ position: 'relative', padding: '0.5rem', borderRadius: '4px', transition: 'background-color 0.2s' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(163, 177, 169, 0.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
                       
-                      {/* Barre d'actions du bloc */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '0.3rem' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#777' }}>Bloc Paragraphe #{index + 1}</span>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleMoveUp(index)}
-                            disabled={index === 0}
-                            style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '3px', padding: '0.1rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            title="Déplacer vers le haut"
-                          >
-                            ↑ Monter
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleMoveDown(index)}
-                            disabled={index === paragraphs.length - 1}
-                            style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '3px', padding: '0.1rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            title="Déplacer vers le bas"
-                          >
-                            ↓ Descendre
-                          </button>
-                          {paragraphs.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteParagraph(index)}
-                              style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '3px', padding: '0.1rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            >
-                              Supprimer
-                            </button>
-                          )}
-                        </div>
+                      {/* BOUTONS D'ACTION FLOTTANTS AU SURVOL */}
+                      <div className="block-actions" style={{ position: 'absolute', right: '0.5rem', top: '-1rem', display: 'flex', gap: '0.3rem', background: '#4a4a4a', padding: '0.2rem 0.5rem', borderRadius: '3px', boxShadow: '0 2px 5px rgba(0,0,0,0.15)', opacity: '0.2', transition: 'opacity 0.2s', zIndex: 10 }}
+                           onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                           onMouseLeave={(e) => e.currentTarget.style.opacity = '0.2'}
+                      >
+                        <button type="button" onClick={() => handleMoveUp(index)} title="Monter" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '0.75rem' }}>↑</button>
+                        <button type="button" onClick={() => handleMoveDown(index)} title="Descendre" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '0.75rem' }}>↓</button>
+                        <button type="button" onClick={() => handleDeleteBlock(index)} title="Supprimer" style={{ background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer', fontSize: '0.75rem' }}>×</button>
                       </div>
 
-                      {/* Contenu éditable du paragraphe */}
-                      <textarea
-                        rows={3}
-                        value={p}
-                        onChange={(e) => handleParagraphChange(index, e.target.value)}
-                        style={{ width: '100%', fontSize: '1.15rem', fontWeight: 300, lineHeight: 1.6, color: '#4a4a4a', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'vertical', fontFamily: 'inherit', textAlign: 'justify' }}
-                      />
+                      {/* RENDU SELON LE TYPE DE BLOC */}
+                      {block.type === 'heading' && (
+                        <input
+                          type="text"
+                          value={block.content}
+                          onChange={(e) => handleBlockChange(index, e.target.value)}
+                          style={{ width: '100%', fontSize: '2.2rem', fontWeight: 300, color: '#4a4a4a', backgroundColor: 'transparent', border: 'none', borderBottom: '1px dashed #A3B1A9', padding: '0.5rem 0', fontFamily: 'inherit', letterSpacing: '1px', outline: 'none' }}
+                          placeholder="Titre principal (H1)"
+                        />
+                      )}
+
+                      {block.type === 'paragraph' && (
+                        <textarea
+                          rows={3}
+                          value={block.content}
+                          onChange={(e) => handleBlockChange(index, e.target.value)}
+                          style={{ width: '100%', fontSize: '1.15rem', fontWeight: 300, lineHeight: 1.6, color: '#4a4a4a', backgroundColor: 'transparent', border: 'none', outline: 'none', resize: 'vertical', fontFamily: 'inherit', textAlign: 'justify' }}
+                          placeholder="Saisissez votre texte ici..."
+                        />
+                      )}
+
+                      {block.type === 'parallax' && (
+                        <div style={{ padding: '1rem', background: '#fff', border: '1px dashed #A3B1A9', borderRadius: '4px' }}>
+                          <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: '#666', marginBottom: '0.3rem', fontWeight: 600 }}>Bloc Image / Parallaxe</label>
+                          <input
+                            type="text"
+                            value={block.content}
+                            onChange={(e) => handleBlockChange(index, e.target.value)}
+                            placeholder="assets/img/apropos1.jpg"
+                            style={{ width: '100%', padding: '0.4rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.9rem', marginBottom: '0.5rem' }}
+                          />
+                          <div 
+                            className="parallax-bg" 
+                            style={{ backgroundImage: `url('${getPreviewImageUrl(block.content)}')`, height: '160px', borderRadius: '4px' }} 
+                          />
+                        </div>
+                      )}
+
                     </div>
                   ))}
+                </div>
 
-                  <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                    <button
-                      type="button"
-                      onClick={handleAddParagraph}
-                      style={{ padding: '0.6rem 2rem', backgroundColor: '#A3B1A9', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500 }}
-                    >
-                      + Ajouter un paragraphe à la page
-                    </button>
-                  </div>
+                {/* BOUTONS D'AJOUT DE NOUVEAUX BLOCS */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '3rem', borderTop: '1px dashed #cbd3d0', paddingTop: '2rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleAddBlock('paragraph')}
+                    style={{ padding: '0.5rem 1.2rem', backgroundColor: '#A3B1A9', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}
+                  >
+                    + Ajouter un paragraphe
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddBlock('heading')}
+                    style={{ padding: '0.5rem 1.2rem', backgroundColor: '#8a9a91', color: '#ffffff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}
+                  >
+                    + Ajouter un titre
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddBlock('parallax')}
+                    style={{ padding: '0.5rem 1.2rem', backgroundColor: '#6f4b21', color: '#ffffff', border: '1px solid #555', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}
+                  >
+                    + Ajouter une image parallaxe
+                  </button>
                 </div>
 
               </div>
             </section>
-
-            {/* Section Image Parallaxe (si présente ou configurable) */}
-            <div style={{ padding: '2rem 0', backgroundColor: '#f4f2ee', textAlign: 'center' }}>
-              <div className="container" style={{ maxWidth: '600px', margin: '0 auto' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: '#666', marginBottom: '0.3rem', fontWeight: 600 }}>Image d'arrière-plan (Parallaxe)</label>
-                <input
-                  type="text"
-                  value={parallaxImg}
-                  onChange={(e) => setParallaxImg(e.target.value)}
-                  placeholder="ex: assets/img/apropos1.jpg"
-                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.9rem', marginBottom: '1rem', backgroundColor: '#fff' }}
-                />
-              </div>
-              {parallaxImg && (
-                <div 
-                  className="parallax-bg" 
-                  style={{ backgroundImage: `url('${getPreviewImageUrl(parallaxImg)}')`, height: '200px' }} 
-                />
-              )}
-            </div>
           </main>
         </div>
       )}
