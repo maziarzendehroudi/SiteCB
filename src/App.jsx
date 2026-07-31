@@ -52,6 +52,22 @@ export default function App() {
     load();
   }, [currentSlug, isAdminView]);
 
+  // Interception des clics sur les liens internes dans le Markdown (ex: href="blog.html")
+  const handleContentClick = (e) => {
+    const anchor = e.target.closest('a');
+    if (!anchor) return;
+    const href = anchor.getAttribute('href');
+    if (!href) return;
+
+    // Si c'est un lien vers une page .html interne
+    if (href.endsWith('.html')) {
+      e.preventDefault();
+      const slug = href.replace('.html', '');
+      setCurrentSlug(slug);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleLogin = (token) => {
     localStorage.setItem('github_token', token);
     setGithubToken(token);
@@ -108,33 +124,33 @@ export default function App() {
           </div>
           <ul className="nav-menu">
             <li className={currentSlug === 'home' ? 'active' : ''}>
-              <a href="#home" onClick={(e) => { e.preventDefault(); setCurrentSlug('home'); }}>Accueil</a>
+              <a href="#home" onClick={(e) => { e.preventDefault(); setCurrentSlug('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Accueil</a>
             </li>
             <li className={`has-submenu ${currentSlug.startsWith('pour-qui') ? 'active' : ''}`}>
-              <a href="#pour-qui" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui'); }}>Pour qui ?</a>
+              <a href="#pour-qui" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Pour qui ?</a>
               <ul className="submenu">
-                <li><a href="#enfants" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-enfants'); }}>Enfants</a></li>
-                <li><a href="#adolescents" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adolescents'); }}>Adolescents</a></li>
-                <li><a href="#adultes" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adultes'); }}>Adultes</a></li>
+                <li><a href="#enfants" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-enfants'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Enfants</a></li>
+                <li><a href="#adolescents" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adolescents'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Adolescents</a></li>
+                <li><a href="#adultes" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adultes'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Adultes</a></li>
               </ul>
             </li>
             <li className={currentSlug === 'contact' ? 'active' : ''}>
-              <a href="#contact" onClick={(e) => { e.preventDefault(); setCurrentSlug('contact'); }}>Où me trouver ?</a>
+              <a href="#contact" onClick={(e) => { e.preventDefault(); setCurrentSlug('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Où me trouver ?</a>
             </li>
             <li className={currentSlug === 'a-propos' ? 'active' : ''}>
-              <a href="#a-propos" onClick={(e) => { e.preventDefault(); setCurrentSlug('a-propos'); }}>A propos</a>
+              <a href="#a-propos" onClick={(e) => { e.preventDefault(); setCurrentSlug('a-propos'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>A propos</a>
             </li>
             <li className={currentSlug === 'cadre-et-tarifs' ? 'active' : ''}>
-              <a href="#cadre-et-tarifs" onClick={(e) => { e.preventDefault(); setCurrentSlug('cadre-et-tarifs'); }}>Cadre et tarifs</a>
+              <a href="#cadre-et-tarifs" onClick={(e) => { e.preventDefault(); setCurrentSlug('cadre-et-tarifs'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Cadre et tarifs</a>
             </li>
             <li className={currentSlug === 'blog' ? 'active' : ''}>
-              <a href="#blog" onClick={(e) => { e.preventDefault(); setCurrentSlug('blog'); }}>Blog</a>
+              <a href="#blog" onClick={(e) => { e.preventDefault(); setCurrentSlug('blog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Blog</a>
             </li>
           </ul>
         </nav>
       </header>
 
-      <main>
+      <main onClick={handleContentClick}>
         {loading ? (
           <section className="text-section" style={{ padding: '4rem 0' }}>
             <div className="container">
