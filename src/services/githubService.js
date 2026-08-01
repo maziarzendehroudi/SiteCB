@@ -7,7 +7,7 @@ const GITHUB_API_BASE = 'https://api.github.com';
 /**
  * Encode une chaîne de caractères UTF-8 en Base64 de manière sécurisée (compatible accents)
  */
-function encodeUTF8ToBase64(str) {
+export function encodeUTF8ToBase64(str) {
   const utf8Bytes = new TextEncoder().encode(str);
   let binaryString = '';
   const len = utf8Bytes.byteLength;
@@ -32,16 +32,58 @@ export function decodeBase64ToUTF8(base64Str) {
 }
 
 /**
+ * NOUVEAU : Récupère la liste des fichiers d'un dossier en direct depuis GitHub (bypass cache)
+ */
+export async function getDirectoryFromGitHub({ owner, repo, path, token, branch = 'main' }) {
+  const timestamp = new Date().getTime();
+  const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}?ref=${branch}&t=${timestamp}`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache'
+    }
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) return [];
+    throw new Error(`Erreur GitHub API (Directory): ${response.statusText}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * NOUVEAU : Récupère le contenu d'un fichier en direct depuis GitHub (bypass cache)
+ */
+export async function getFileFromGitHub({ owner, repo, path, token, branch = 'main' }) {
+  const timestamp = new Date().getTime();
+  const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}?ref=${branch}&t=${timestamp}`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache'
+    }
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    throw new Error(`Erreur GitHub API (File): ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return decodeBase64ToUTF8(data.content);
+}
+
+/**
  * Enregistre ou met à jour un fichier Markdown dans le dépôt GitHub du client.
- * 
- * @param {Object} params
- * @param {string} params.owner - Propriétaire du dépôt (ex: 'maziarzendehroudi')
- * @param {string} params.repo - Nom du dépôt (ex: 'SiteCB')
- * @param {string} params.path - Chemin du fichier dans le dépôt (ex: 'content/pages/accueil.md')
- * @param {string} params.message - Message du commit
- * @param {string} params.content - Contenu complet du fichier (Markdown + Frontmatter)
- * @param {string} params.token - Token d'accès personnel GitHub de l'administrateur
- * @param {string} [params.branch='main'] - Branche cible (par défaut 'main' ou 'master')
  */
 export async function saveFileToGitHub({
   owner,
@@ -55,13 +97,16 @@ export async function saveFileToGitHub({
   const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`;
 
   try {
-    // 1. Récupérer le SHA du fichier existant si il existe (requis par l'API GitHub pour une mise à jour)
+    // 1. Récupérer le SHA du fichier existant (Requis pour UPDATE). 
+    // AJOUT CACHE-BUSTING : t=${timestamp} pour forcer la lecture du nouveau SHA.
     let sha = null;
-    const getResponse = await fetch(`${url}?ref=${branch}`, {
+    const timestamp = new Date().getTime();
+    const getResponse = await fetch(`${url}?ref=${branch}&t=${timestamp}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28'
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
     });
 
@@ -70,7 +115,7 @@ export async function saveFileToGitHub({
       sha = fileData.sha;
     }
 
-    // 2. Encoder le contenu en Base64 compatible UTF-8 via TextEncoder
+    // 2. Encoder le contenu en Base64 compatible UTF-8
     const encodedContent = encodeUTF8ToBase64(content);
 
     // 3. Envoyer la requête PUT pour créer ou mettre à jour le fichier
