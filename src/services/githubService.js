@@ -42,9 +42,7 @@ export async function getDirectoryFromGitHub({ owner, repo, path, token, branch 
     headers: {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache'
+      'X-GitHub-Api-Version': '2022-11-28'
     }
   });
 
@@ -67,9 +65,7 @@ export async function getFileFromGitHub({ owner, repo, path, token, branch = 'ma
     headers: {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache'
+      'X-GitHub-Api-Version': '2022-11-28'
     }
   });
 
@@ -98,15 +94,13 @@ export async function saveFileToGitHub({
 
   try {
     // 1. Récupérer le SHA du fichier existant (Requis pour UPDATE). 
-    // AJOUT CACHE-BUSTING : t=${timestamp} pour forcer la lecture du nouveau SHA.
     let sha = null;
     const timestamp = new Date().getTime();
     const getResponse = await fetch(`${url}?ref=${branch}&t=${timestamp}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        'X-GitHub-Api-Version': '2022-11-28'
       }
     });
 
