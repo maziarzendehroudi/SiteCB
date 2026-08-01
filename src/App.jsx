@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { marked } from 'marked';
-import { getPageContent } from './services/contentService';
+import { getPageContent, getGlobalSettings, DEFAULT_SETTINGS } from './services/contentService';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 import PageEditor from './components/PageEditor';
 import BlogManager from './components/BlogManager';
 import './index.css';
 
-// Configuration de marked pour autoriser et parser correctement le HTML brut intégré dans les .md
 marked.setOptions({
   gfm: true,
   breaks: true,
@@ -17,12 +16,23 @@ marked.setOptions({
 
 export default function App() {
   const [pageData, setPageData] = useState(null);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [currentSlug, setCurrentSlug] = useState('home');
   const [isAdminView, setIsAdminView] = useState(false);
-  const [adminSubView, setAdminSubView] = useState('dashboard'); // 'dashboard', 'pages', 'blog', 'media'
-  const [githubToken, setGithubToken] = useState(() => localStorage.getItem('github_token') || '');
+  const [adminSubView, setAdminSubView] = useState('dashboard');
+  const [githubToken, setGithubToken] = useState(() => localStorage.getItem('github_token') || sessionStorage.getItem('github_admin_token') || '');
 
+  // Chargement des données globales (Header, Menu, Footer)
+  useEffect(() => {
+    async function loadSettings() {
+      const data = await getGlobalSettings();
+      setSettings(data);
+    }
+    loadSettings();
+  }, [isAdminView]);
+
+  // Chargement du contenu de la page
   useEffect(() => {
     if (isAdminView) return;
 
@@ -31,7 +41,6 @@ export default function App() {
       try {
         const data = await getPageContent(currentSlug);
         
-        // Ajustement automatique des chemins d'images pour le build et le dev
         let processedContent = data.content;
         if (processedContent) {
           const baseUrl = import.meta.env.BASE_URL || '/';
@@ -60,7 +69,6 @@ export default function App() {
     load();
   }, [currentSlug, isAdminView]);
 
-  // Interception des clics sur les liens internes dans le Markdown (ex: href="blog.html")
   const handleContentClick = (e) => {
     const anchor = e.target.closest('a');
     if (!anchor) return;
@@ -77,12 +85,14 @@ export default function App() {
 
   const handleLogin = (token) => {
     localStorage.setItem('github_token', token);
+    sessionStorage.setItem('github_admin_token', token);
     setGithubToken(token);
     setAdminSubView('dashboard');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('github_token');
+    sessionStorage.removeItem('github_admin_token');
     setGithubToken('');
     setIsAdminView(false);
     setAdminSubView('dashboard');
@@ -91,15 +101,19 @@ export default function App() {
   if (isAdminView) {
     return (
       <div className="site-wrapper" style={{ minHeight: '100vh', backgroundColor: '#fcfbf9' }}>
-        <div style={{ padding: '1rem 2rem', background: '#fff', borderBottom: '1px solid #e6e2dd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 400, color: '#4a4a4a' }}>Administration du Site</h1>
-          <button 
-            onClick={() => { setIsAdminView(false); setAdminSubView('dashboard'); }}
-            style={{ padding: '0.5rem 1rem', cursor: 'pointer', background: '#A3B1A9', color: '#fff', border: 'none', borderRadius: '2px', fontSize: '0.9rem' }}
-          >
-            ← Retour au site public
-          </button>
-        </div>
+        
+        {/* Le Header natif noir a été supprimé ici car PageEditor utilise son propre menu flottant désormais */}
+        {adminSubView === 'dashboard' && (
+          <div style={{ padding: '1rem 2rem', background: '#fff', borderBottom: '1px solid #e6e2dd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h1 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 400, color: '#4a4a4a' }}>Administration du Site</h1>
+            <button 
+              onClick={() => { setIsAdminView(false); setAdminSubView('dashboard'); }}
+              style={{ padding: '0.5rem 1rem', cursor: 'pointer', background: '#A3B1A9', color: '#fff', border: 'none', borderRadius: '2px', fontSize: '0.9rem' }}
+            >
+              ← Retour au site public
+            </button>
+          </div>
+        )}
 
         {!githubToken ? (
           <div style={{ padding: '3rem', maxWidth: '500px', margin: '0 auto', textAlign: 'left' }}>
@@ -147,14 +161,14 @@ export default function App() {
       <header>
         <div className="header-top">
           <div className="header-brand">
-            <div className="site-title">Camille Bongue</div>
-            <p className="subtitle">Psychothérapeute</p>
-            <p className="subtitle">Psychanalyste</p>
+            <div className="site-title">{settings.header.title}</div>
+            <p className="subtitle">{settings.header.subtitle1}</p>
+            <p className="subtitle">{settings.header.subtitle2}</p>
           </div>
           <div className="header-info">
-            <p>Centre médical Adamantium</p>
-            <p>Cap Alpha, Clapiers</p>
-            <p>07 68 99 07 07</p>
+            <p>{settings.header.info1}</p>
+            <p>{settings.header.info2}</p>
+            <p>{settings.header.info3}</p>
           </div>
         </div>
         <nav className="navbar">
@@ -165,29 +179,24 @@ export default function App() {
             <span></span><span></span><span></span>
           </div>
           <ul className="nav-menu">
-            <li className={currentSlug === 'home' ? 'active' : ''}>
-              <a href="#home" onClick={(e) => { e.preventDefault(); setCurrentSlug('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Accueil</a>
-            </li>
-            <li className={`has-submenu ${currentSlug.startsWith('pour-qui') ? 'active' : ''}`}>
-              <a href="#pour-qui" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Pour qui ?</a>
-              <ul className="submenu">
-                <li><a href="#enfants" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-enfants'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Enfants</a></li>
-                <li><a href="#adolescents" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adolescents'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Adolescents</a></li>
-                <li><a href="#adultes" onClick={(e) => { e.preventDefault(); setCurrentSlug('pour-qui-adultes'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Adultes</a></li>
-              </ul>
-            </li>
-            <li className={currentSlug === 'contact' ? 'active' : ''}>
-              <a href="#contact" onClick={(e) => { e.preventDefault(); setCurrentSlug('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Où me trouver ?</a>
-            </li>
-            <li className={currentSlug === 'a-propos' ? 'active' : ''}>
-              <a href="#a-propos" onClick={(e) => { e.preventDefault(); setCurrentSlug('a-propos'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>A propos</a>
-            </li>
-            <li className={currentSlug === 'cadre-et-tarifs' ? 'active' : ''}>
-              <a href="#cadre-et-tarifs" onClick={(e) => { e.preventDefault(); setCurrentSlug('cadre-et-tarifs'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Cadre et tarifs</a>
-            </li>
-            <li className={currentSlug === 'blog' ? 'active' : ''}>
-              <a href="#blog" onClick={(e) => { e.preventDefault(); setCurrentSlug('blog'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Blog</a>
-            </li>
+            {settings.menu.map((item) => (
+              <li key={item.id} className={`${item.submenu && item.submenu.length > 0 ? 'has-submenu' : ''} ${currentSlug.startsWith(item.slug) ? 'active' : ''}`}>
+                <a href={`#${item.slug}`} onClick={(e) => { e.preventDefault(); setCurrentSlug(item.slug); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  {item.label}
+                </a>
+                {item.submenu && item.submenu.length > 0 && (
+                  <ul className="submenu">
+                    {item.submenu.map((sub) => (
+                      <li key={sub.id}>
+                        <a href={`#${sub.slug}`} onClick={(e) => { e.preventDefault(); setCurrentSlug(sub.slug); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                          {sub.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
           </ul>
         </nav>
       </header>
@@ -211,13 +220,13 @@ export default function App() {
 
       <footer>
         <div className="footer-container">
-          <div>Camille Bongue - Psychothérapeute - Psychanalyste - 07 68 99 07 07</div>
+          <div>{settings.footer.text}</div>
           <div>
             <a 
               href="#admin" 
               onClick={(e) => { e.preventDefault(); setIsAdminView(true); }}
             >
-              Politique de confidentialité
+              Administration CMS
             </a>
           </div>
         </div>

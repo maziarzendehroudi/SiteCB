@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { saveFileToGitHub } from '../services/githubService';
+import { saveFileToGitHub, getFileFromGitHub } from '../services/githubService';
 
 const STATIC_PAGES = [
   { id: 'home', path: 'content/pages/home.md', name: 'Accueil' },
@@ -32,33 +32,30 @@ export default function PageEditor({ onBack }) {
 
   const owner = 'maziarzendehroudi';
   const repo = 'SiteCB';
-  const token = localStorage.getItem('github_token') || sessionStorage.getItem('github_admin_token');
+  // Correction de la clé du token pour matcher avec AdminLogin
+  const token = sessionStorage.getItem('github_admin_token') || localStorage.getItem('github_token');
 
   // Parser intelligent de la page active en blocs riches
   useEffect(() => {
     async function fetchPageContent() {
       setLoading(true);
       setMessage(null);
-      setEditingIndex(null); // Reset édition au changement de page
+      setEditingIndex(null); 
+      
       try {
-        // Ajout d'un timestamp pour forcer le contournement du cache GitHub
-        const timestamp = new Date().getTime();
-        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${selectedPage.path}?t=${timestamp}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json',
-            'If-None-Match': '' // Force GitHub à ne pas utiliser l'ETag en cache
-          }
+        // Utilisation du service centralisé robuste (qui gère l'UTF-8 et le cache-busting correctement)
+        const rawContent = await getFileFromGitHub({
+          owner,
+          repo,
+          path: selectedPage.path,
+          token,
+          branch: 'main'
         });
 
-        if (!res.ok) throw new Error("Impossible de charger le fichier depuis GitHub.");
+        if (!rawContent) throw new Error("Fichier introuvable sur GitHub.");
 
-        const data = await res.json();
-        const decodedContent = decodeURIComponent(
-          atob(data.content).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
-        );
-
-        const fmMatch = decodedContent.match(/^---\s*([\s\S]*?)\s*---\s*([\s\S]*)$/);
+        const fmMatch = rawContent.match(/^---\s*([\s\S]*?)\s*---\s*([\s\S]*)$/);
+        
         if (fmMatch) {
           const frontmatter = fmMatch[1];
           const body = fmMatch[2];
@@ -69,7 +66,6 @@ export default function PageEditor({ onBack }) {
           setPageSlug(sMatch ? sMatch[1].trim() : selectedPage.id);
 
           const parsedBlocks = [];
-
           const lines = body.split('\n');
           let currentText = '';
 
@@ -111,7 +107,7 @@ export default function PageEditor({ onBack }) {
 
           setBlocks(parsedBlocks);
         } else {
-          setBlocks([{ type: 'paragraph', content: decodedContent }]);
+          setBlocks([{ type: 'paragraph', content: rawContent }]);
         }
       } catch (err) {
         setMessage({ type: 'error', text: err.message });
@@ -215,16 +211,18 @@ ${bodyContent}`;
       owner,
       repo,
       path: selectedPage.path,
-      message: `Mise à jour visuelle complète de la page ${selectedPage.name}`,
+      message: `Mise à jour visuelle de la page ${selectedPage.name}`,
       content: finalContent,
       token,
     });
 
     setSaving(false);
     if (result.success) {
-      setMessage({ type: 'success', text: "Modifications enregistrées et publiées sur GitHub avec succès !" });
+      setMessage({ type: 'success', text: "Sauvegardé et publié avec succès !" });
+      // On efface le message après 3 secondes pour ne pas polluer l'écran
+      setTimeout(() => setMessage(null), 3000);
     } else {
-      setMessage({ type: 'error', text: `Erreur lors de la sauvegarde : ${result.error}` });
+      setMessage({ type: 'error', text: `Erreur : ${result.error}` });
     }
   };
 
@@ -237,43 +235,56 @@ ${bodyContent}`;
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       
-      <div style={{ position: 'sticky', top: 0, zIndex: 9999, backgroundColor: '#2f2f2f', color: '#ffffff', padding: '0.75rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a3a3a3', fontSize: '0.9rem', fontWeight: 500 }}>
-            ← Tableau de bord
-          </button>
-          <span style={{ color: '#666' }}>|</span>
-          <select
-            value={selectedPage.id}
-            onChange={(e) => {
-              const page = STATIC_PAGES.find(p => p.id === e.target.value);
-              setSelectedPage(page);
-            }}
-            style={{ padding: '0.3rem 0.8rem', backgroundColor: '#4a4a4a', color: '#ffffff', border: '1px solid #555', borderRadius: '4px', fontSize: '0.85rem', cursor: 'pointer' }}
-          >
-            {STATIC_PAGES.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        </div>
+      {/* MENU FLOTTANT (Remplacement de l'ancien Header Noir) */}
+      <div style={{
+        position: 'fixed',
+        bottom: '2rem',
+        right: '2rem',
+        zIndex: 9999,
+        backgroundColor: 'rgba(40, 40, 40, 0.95)',
+        backdropFilter: 'blur(8px)',
+        padding: '0.75rem 1.5rem',
+        borderRadius: '50px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1.5rem',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a3a3a3', fontSize: '0.9rem', fontWeight: 500, padding: 0 }}>
+          ← Retour
+        </button>
+        
+        <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(255,255,255,0.2)' }}></div>
+        
+        <select
+          value={selectedPage.id}
+          onChange={(e) => {
+            const page = STATIC_PAGES.find(p => p.id === e.target.value);
+            setSelectedPage(page);
+          }}
+          style={{ background: 'transparent', color: '#ffffff', border: 'none', fontSize: '0.95rem', cursor: 'pointer', outline: 'none', fontWeight: 500 }}
+        >
+          {STATIC_PAGES.map(p => (
+            <option key={p.id} value={p.id} style={{ color: '#000' }}>{p.name}</option>
+          ))}
+        </select>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ fontSize: '0.8rem', color: '#a3a3a3', fontStyle: 'italic' }}>Éditeur Visuel WYSIWYG</span>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            style={{ padding: '0.5rem 1.5rem', backgroundColor: '#6F4B21', color: '#ffffff', border: 'none', borderRadius: '4px', fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer' }}
-          >
-            {saving ? "Publication..." : "Enregistrer sur GitHub"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          style={{ padding: '0.6rem 1.5rem', backgroundColor: '#6F4B21', color: '#ffffff', border: 'none', borderRadius: '30px', fontSize: '0.9rem', fontWeight: 600, cursor: saving ? 'wait' : 'pointer', transition: 'background 0.2s' }}
+        >
+          {saving ? "⏳..." : "✔ Publier"}
+        </button>
       </div>
 
+      {/* NOTIFICATIONS FLOTTANTES */}
       {message && (
-        <div style={{ margin: '1rem 2rem 0', padding: '1rem', borderRadius: '4px', fontSize: '0.9rem', backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2', color: message.type === 'success' ? '#166534' : '#991b1b', border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}` }}>
+        <div style={{ position: 'fixed', top: '2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, padding: '1rem 2rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: 500, backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2', color: message.type === 'success' ? '#166534' : '#991b1b', border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`, boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
           {message.text}
         </div>
       )}
@@ -281,7 +292,13 @@ ${bodyContent}`;
       {loading ? (
         <div style={{ textAlign: 'center', padding: '8rem 0', color: 'var(--text)', fontSize: '1.1rem' }}>Chargement de la page...</div>
       ) : (
-        <div className="site-wrapper" style={{ flex: 1, backgroundColor: 'transparent', textAlign: 'left' }}>
+        <div className="site-wrapper" style={{ flex: 1, backgroundColor: 'transparent', textAlign: 'left', paddingBottom: '8rem' }}>
+          
+          {/* ZONE RESERVÉE POUR LE HEADER PUBLIC (Étape suivante) */}
+          <div style={{ textAlign: 'center', padding: '1rem', borderBottom: '1px dashed #ccc', color: '#888', fontStyle: 'italic', backgroundColor: '#fafafa' }}>
+            [ Le Header du site viendra s'insérer ici ]
+          </div>
+
           <main className="markdown-content">
             <section className="text-section" style={{ padding: '2rem 0' }}>
               <div className="container" style={{ maxWidth: '980px', margin: '0 auto', padding: '0 2rem' }}>
@@ -300,18 +317,18 @@ ${bodyContent}`;
                         onDragOver={(e) => e.preventDefault()}
                         style={{ 
                           position: 'relative', 
-                          borderRadius: '4px', 
+                          borderRadius: '8px', 
                           border: '2px dashed transparent',
                           padding: isEditing ? '1.5rem' : '0.5rem',
                           margin: isEditing ? '1rem 0' : '0',
-                          backgroundColor: isEditing ? 'var(--code-bg)' : 'transparent',
+                          backgroundColor: isEditing ? '#f8f9fa' : 'transparent',
                           transition: 'all 0.2s',
                           cursor: isEditing ? 'default' : 'grab'
                         }}
                         onMouseEnter={(e) => {
                           if (!isEditing) {
-                            e.currentTarget.style.border = '2px dashed var(--border)';
-                            e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)';
+                            e.currentTarget.style.border = '2px dashed #d1d5db';
+                            e.currentTarget.style.backgroundColor = '#f3f4f6';
                             const actions = e.currentTarget.querySelector('.block-actions');
                             if(actions) actions.style.opacity = '1';
                           }
@@ -331,48 +348,48 @@ ${bodyContent}`;
                             className="block-actions"
                             style={{ 
                               position: 'absolute', right: '1rem', top: '-1rem', display: 'flex', gap: '0.5rem', 
-                              background: 'var(--bg)', padding: '0.3rem 0.8rem', borderRadius: '20px', 
-                              boxShadow: 'var(--shadow)', opacity: '0', transition: 'opacity 0.2s', zIndex: 10,
-                              border: '1px solid var(--border)', alignItems: 'center'
+                              background: '#fff', padding: '0.4rem 1rem', borderRadius: '30px', 
+                              boxShadow: '0 2px 10px rgba(0,0,0,0.1)', opacity: '0', transition: 'opacity 0.2s', zIndex: 10,
+                              border: '1px solid #e5e7eb', alignItems: 'center'
                             }}
                           >
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text)', opacity: 0.5, cursor: 'grab', marginRight: '0.5rem' }}>⋮⋮ Glisser</span>
-                            <button type="button" onClick={() => setEditingIndex(index)} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}>✎ Éditer</button>
-                            <button type="button" onClick={() => handleDeleteBlock(index)} style={{ background: 'none', border: 'none', color: '#e3342f', cursor: 'pointer', fontSize: '0.85rem' }}>Corbeille</button>
+                            <span style={{ fontSize: '0.75rem', color: '#6b7280', cursor: 'grab', marginRight: '0.5rem' }}>⋮⋮ Glisser</span>
+                            <button type="button" onClick={() => setEditingIndex(index)} style={{ background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>✎ Éditer</button>
+                            <button type="button" onClick={() => handleDeleteBlock(index)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>× Supprimer</button>
                           </div>
                         )}
 
                         {isEditing ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
-                              <span style={{ fontWeight: 500, fontSize: '0.9rem', color: 'var(--text-h)' }}>Mode Édition - {block.type}</span>
-                              <button type="button" onClick={() => setEditingIndex(null)} style={{ padding: '0.4rem 1rem', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>✔ Valider</button>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+                              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#374151', textTransform: 'uppercase' }}>Édition : {block.type}</span>
+                              <button type="button" onClick={() => setEditingIndex(null)} style={{ padding: '0.4rem 1rem', background: '#10b981', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}>✔ Terminer</button>
                             </div>
 
                             {block.type === 'heading1' && (
-                              <input type="text" value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', fontSize: '1.2rem', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', fontFamily: 'inherit' }} placeholder="Titre principal (H1)" />
+                              <input type="text" value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', fontSize: '1.2rem', padding: '0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontFamily: 'inherit' }} placeholder="Titre principal (H1)" />
                             )}
 
                             {block.type === 'heading2' && (
-                              <input type="text" value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', fontSize: '1.1rem', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', fontFamily: 'inherit' }} placeholder="Sous-titre (H2)" />
+                              <input type="text" value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', fontSize: '1.1rem', padding: '0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontFamily: 'inherit' }} placeholder="Sous-titre (H2)" />
                             )}
 
                             {block.type === 'paragraph' && (
-                              <textarea rows={6} value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', fontSize: '1rem', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="Saisissez votre texte ici..." />
+                              <textarea rows={6} value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', fontSize: '1rem', padding: '0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontFamily: 'inherit', resize: 'vertical' }} placeholder="Saisissez votre texte ici..." />
                             )}
 
                             {block.type === 'citation' && (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <textarea rows={3} value={block.text} onChange={(e) => handleBlockChange(index, 'text', e.target.value)} style={{ width: '100%', fontSize: '1rem', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', fontFamily: 'inherit' }} placeholder="Texte de la citation..." />
-                                <input type="text" value={block.author} onChange={(e) => handleBlockChange(index, 'author', e.target.value)} style={{ width: '100%', fontSize: '1rem', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)', fontFamily: 'inherit' }} placeholder="Auteur (laisser vide si aucun)" />
+                                <textarea rows={3} value={block.text} onChange={(e) => handleBlockChange(index, 'text', e.target.value)} style={{ width: '100%', fontSize: '1rem', padding: '0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontFamily: 'inherit' }} placeholder="Texte de la citation..." />
+                                <input type="text" value={block.author} onChange={(e) => handleBlockChange(index, 'author', e.target.value)} style={{ width: '100%', fontSize: '1rem', padding: '0.75rem', borderRadius: '6px', border: '1px solid #d1d5db', fontFamily: 'inherit' }} placeholder="Auteur (laisser vide si aucun)" />
                               </div>
                             )}
 
                             {block.type === 'parallax' && (
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text)', marginBottom: '0.3rem' }}>Chemin de l'image</label>
-                                <input type="text" value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.9rem', marginBottom: '0.5rem' }} />
-                                <div className="parallax" style={{ backgroundImage: `url('${getPreviewImageUrl(block.content)}')`, height: '120px', borderRadius: '4px', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: '#6b7280', marginBottom: '0.3rem', fontWeight: 'bold' }}>Chemin de l'image (dossier assets/img/)</label>
+                                <input type="text" value={block.content} onChange={(e) => handleBlockChange(index, 'content', e.target.value)} style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.9rem', marginBottom: '0.5rem' }} />
+                                <div className="parallax" style={{ backgroundImage: `url('${getPreviewImageUrl(block.content)}')`, height: '150px', borderRadius: '6px', backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid #e5e7eb' }} />
                               </div>
                             )}
                           </div>
@@ -393,7 +410,7 @@ ${bodyContent}`;
 
                             {block.type === 'citation' && (
                               <div style={{ margin: '3rem 0' }}>
-                                <p style={{ fontSize: '30px', color: 'var(--accent)', fontStyle: 'italic', fontWeight: 300, lineHeight: 1.3, marginBottom: '0', textAlign: 'center' }}>"{block.text}"</p>
+                                <p style={{ fontSize: '30px', color: 'rgb(111, 75, 33)', fontStyle: 'italic', fontWeight: 300, lineHeight: 1.3, marginBottom: '0', textAlign: 'center' }}>"{block.text}"</p>
                                 {block.author && (
                                   <p style={{ fontSize: '1.1rem', fontWeight: 300, marginTop: '0', marginBottom: '2rem', textAlign: 'center' }}>{block.author}</p>
                                 )}
@@ -425,16 +442,21 @@ ${bodyContent}`;
                   })}
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem', marginTop: '4rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
-                  <button type="button" onClick={() => handleAddBlock('paragraph')} style={{ padding: '0.6rem 1.2rem', backgroundColor: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>+ Paragraphe</button>
-                  <button type="button" onClick={() => handleAddBlock('heading2')} style={{ padding: '0.6rem 1.2rem', backgroundColor: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>+ Sous-titre</button>
-                  <button type="button" onClick={() => handleAddBlock('citation')} style={{ padding: '0.6rem 1.2rem', backgroundColor: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>+ Citation</button>
-                  <button type="button" onClick={() => handleAddBlock('parallax')} style={{ padding: '0.6rem 1.2rem', backgroundColor: 'var(--code-bg)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>+ Image Parallaxe</button>
+                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem', marginTop: '4rem', borderTop: '1px solid #e5e7eb', paddingTop: '2rem' }}>
+                  <button type="button" onClick={() => handleAddBlock('paragraph')} style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', color: '#374151', border: '1px solid #d1d5db', borderRadius: '30px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>+ Texte</button>
+                  <button type="button" onClick={() => handleAddBlock('heading2')} style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', color: '#374151', border: '1px solid #d1d5db', borderRadius: '30px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>+ Titre</button>
+                  <button type="button" onClick={() => handleAddBlock('citation')} style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', color: '#374151', border: '1px solid #d1d5db', borderRadius: '30px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>+ Citation</button>
+                  <button type="button" onClick={() => handleAddBlock('parallax')} style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', color: '#374151', border: '1px solid #d1d5db', borderRadius: '30px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>+ Image / Parallaxe</button>
                 </div>
 
               </div>
             </section>
           </main>
+          
+          {/* ZONE RESERVÉE POUR LE FOOTER PUBLIC (Étape suivante) */}
+          <div style={{ textAlign: 'center', padding: '1rem', borderTop: '1px dashed #ccc', color: '#888', fontStyle: 'italic', backgroundColor: '#fafafa', marginTop: '2rem' }}>
+            [ Le Footer du site viendra s'insérer ici ]
+          </div>
         </div>
       )}
     </div>
